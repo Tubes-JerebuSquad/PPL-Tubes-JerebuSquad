@@ -6,20 +6,16 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('foto_revisi_laporan', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+            $table->foreignId('revisi_id')->constrained('revisi_laporan', 'revisi_id');
+            $table->foreignId('berkas_media_id')->constrained('berkas_media', 'berkas_media_id');
+            $table->integer('urutan_tampilan')->default(true);
+            $table->primary(['revisi_id', 'berkas_media_id']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('foto_revisi_laporan');
