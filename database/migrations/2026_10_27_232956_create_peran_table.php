@@ -6,15 +6,12 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('peran', function (Blueprint $table) {
-            $table->id();
-            $table->string('nama_peran')->unique();
-            $table->timestamps();
+            $table->id('peran_id');
+            $table->string('nama_peran', 50)->unique();
+            $table->text('deskripsi')->nullable();
         });
     }
 
