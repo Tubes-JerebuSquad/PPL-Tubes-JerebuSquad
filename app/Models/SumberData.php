@@ -38,6 +38,24 @@ class SumberData extends Model
 
     public const JENIS_EKSTERNAL = 'EKSTERNAL';
 
+    /**
+     * Field yang wajib terisi sebelum dataset boleh diaktifkan.
+     *
+     * @var array<int, string>
+     */
+    public const FIELD_WAJIB_AKTIVASI = [
+        'nama_sumber',
+        'nama_penyedia',
+        'nama_lisensi',
+        'format_data',
+        'kode_crs',
+        'status_kualitas',
+        'url_sumber',
+        'deskripsi_cakupan',
+        'periode_mulai',
+        'interval_penyegaran_jam',
+    ];
+
     protected $table = 'sumber_data';
 
     protected $primaryKey = 'sumber_id';
@@ -97,6 +115,35 @@ class SumberData extends Model
     public function scopeNonaktif(Builder $query): Builder
     {
         return $query->where('is_aktif', false);
+    }
+
+    /**
+     * Daftar field wajib yang masih kosong, kosong bila metadata sudah lengkap.
+     *
+     * @return array<int, string>
+     */
+    public function metadataBelumLengkap(): array
+    {
+        $belumLengkap = [];
+
+        foreach (self::FIELD_WAJIB_AKTIVASI as $field) {
+            $nilai = $this->getAttribute($field);
+
+            if ($nilai === null || (is_string($nilai) && trim($nilai) === '')) {
+                $belumLengkap[] = $field;
+            }
+        }
+
+        if ($this->interval_penyegaran_jam !== null && $this->interval_penyegaran_jam < 1) {
+            $belumLengkap[] = 'interval_penyegaran_jam';
+        }
+
+        return array_values(array_unique($belumLengkap));
+    }
+
+    public function metadataLengkap(): bool
+    {
+        return $this->metadataBelumLengkap() === [];
     }
 
     /**

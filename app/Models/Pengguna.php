@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use Database\Factories\PenggunaFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -19,6 +21,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Hidden(['password_hash'])]
 class Pengguna extends Model
 {
+    /** @use HasFactory<PenggunaFactory> */
+    use HasFactory;
+
     public const CREATED_AT = 'dibuat_pada';
 
     public const UPDATED_AT = 'diperbarui_pada';
