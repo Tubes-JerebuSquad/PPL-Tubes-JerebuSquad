@@ -9,10 +9,24 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('foto_revisi_laporan', function (Blueprint $table) {
-            $table->foreignId('revisi_id')->constrained('revisi_laporan', 'revisi_id');
-            $table->foreignId('berkas_media_id')->constrained('berkas_media', 'berkas_media_id');
-            $table->integer('urutan_tampilan')->default(true);
-            $table->primary(['revisi_id', 'berkas_media_id']);
+            $table->id();
+
+            $table->foreignId('revisi_laporan_id')
+                ->constrained('revisi_laporan')
+                ->cascadeOnDelete();
+
+            $table->foreignId('berkas_media_id')
+                ->constrained('berkas_media')
+                ->cascadeOnDelete();
+
+            $table->unsignedInteger('urutan_tampilan')->default(1);
+
+            $table->timestamps();
+
+            $table->unique([
+                'revisi_laporan_id',
+                'berkas_media_id',
+            ]);
         });
     }
 

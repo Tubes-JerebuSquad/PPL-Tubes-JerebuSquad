@@ -9,16 +9,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('berkas_media', function (Blueprint $table) {
-            $table->id('berkas_media_id');
-            $table->foreignId('diunggah_oleh')->constrained('pengguna', 'pengguna_id');
-            $table->string('kunci_penyimpanan', 500)->unique();
-            $table->string('nama_file_asli', 255);
-            $table->string('tipe_mime', 100);
-            $table->bigInteger('ukuran_file_byte');
-            $table->string('checksum', 128)->nullable();
-            $table->string('tingkat_akses', 30)->default('PRIVATE');
-            $table->timestamp('dibuat_pada')->useCurrent();
-            $table->comment('Berkas disimpan pada private object storage atau disk lokal untuk pengembangan. Basis data menyimpan metadata dan referensi berkas.');
+            $table->id();
+
+            $table->string('nama_asli');
+            $table->string('nama_file');
+            $table->string('path_file');
+            $table->string('mime_type');
+            $table->unsignedBigInteger('ukuran_byte');
+            $table->unsignedBigInteger('diunggah_oleh')->nullable();
+
+            $table->timestamps();
+
+            $table->index('diunggah_oleh');
         });
     }
 
