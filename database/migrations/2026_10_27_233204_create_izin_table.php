@@ -6,20 +6,15 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('izin', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+            $table->id('izin_id');
+            $table->string('kode_izin', 100)->unique();
+            $table->text('deskripsi')->nullable();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('izin');
