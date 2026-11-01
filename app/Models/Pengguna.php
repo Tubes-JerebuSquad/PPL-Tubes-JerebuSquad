@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'peran_id',
@@ -54,23 +53,7 @@ class Pengguna extends Model
     }
 
     /**
-     * @return HasMany<SumberData, $this>
-     */
-    public function sumberDataDibuat(): HasMany
-    {
-        return $this->hasMany(SumberData::class, 'dibuat_oleh', 'pengguna_id');
-    }
-
-    /**
-     * @return HasMany<RiwayatSumberData, $this>
-     */
-    public function riwayatSumberData(): HasMany
-    {
-        return $this->hasMany(RiwayatSumberData::class, 'pengguna_id', 'pengguna_id');
-    }
-
-    /**
-     * Satu-satunya titik penentu hak akses admin katalog sumber data.
+     * Hak akses admin ditentukan oleh nama peran, bukan id yang di-hardcode.
      */
     public function isAdmin(): bool
     {
