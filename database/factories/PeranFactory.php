@@ -27,15 +27,31 @@ class PeranFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'nama_peran' => 'Admin',
-            'deskripsi' => 'Administrator sistem',
+            'deskripsi' => 'Pengelola data dan akses sistem',
         ]);
     }
 
-    public function relawan(): static
+    public function pengawas(): static
     {
         return $this->state(fn (array $attributes) => [
-            'nama_peran' => 'Relawan',
-            'deskripsi' => 'Relawan lapangan',
+            'nama_peran' => 'Pengawas',
+            'deskripsi' => 'Pemantau data dan laporan',
+        ]);
+    }
+
+    public function petugasLapangan(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'nama_peran' => 'Petugas Lapangan',
+            'deskripsi' => 'Pencatat hasil pengamatan lapangan',
+        ]);
+    }
+
+    public function masyarakat(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'nama_peran' => 'Masyarakat',
+            'deskripsi' => 'Pengguna umum yang mengirim laporan',
         ]);
     }
 }

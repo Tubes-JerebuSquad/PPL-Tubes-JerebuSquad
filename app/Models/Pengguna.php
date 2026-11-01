@@ -29,6 +29,8 @@ class Pengguna extends Model
 
     public const STATUS_AKTIF = 'ACTIVE';
 
+    public const STATUS_NONAKTIF = 'INACTIVE';
+
     protected $table = 'pengguna';
 
     protected $primaryKey = 'pengguna_id';

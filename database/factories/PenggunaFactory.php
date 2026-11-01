@@ -35,10 +35,17 @@ class PenggunaFactory extends Factory
         ]);
     }
 
+    public function masyarakat(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'peran_id' => Peran::factory()->masyarakat(),
+        ]);
+    }
+
     public function nonaktif(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status_akun' => 'INACTIVE',
+            'status_akun' => Pengguna::STATUS_NONAKTIF,
         ]);
     }
 }
