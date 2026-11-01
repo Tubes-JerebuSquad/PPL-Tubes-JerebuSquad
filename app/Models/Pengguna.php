@@ -6,8 +6,8 @@ use Database\Factories\PenggunaFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 #[Fillable([
     'peran_id',
@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'status_akun',
 ])]
 #[Hidden(['password_hash'])]
-class Pengguna extends Model
+class Pengguna extends Authenticatable
 {
     /** @use HasFactory<PenggunaFactory> */
     use HasFactory;
@@ -65,5 +65,21 @@ class Pengguna extends Model
     public function isAktif(): bool
     {
         return $this->status_akun === self::STATUS_AKTIF;
+    }
+
+    /**
+     * Laravel membaca password dari kolom password_hash.
+     */
+    public function getAuthPassword(): string
+    {
+        return $this->password_hash;
+    }
+
+    /**
+     * Tabel pengguna tidak punya kolom remember_token.
+     */
+    public function getRememberTokenName(): string
+    {
+        return '';
     }
 }
