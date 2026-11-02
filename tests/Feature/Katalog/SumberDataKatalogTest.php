@@ -78,6 +78,34 @@ class SumberDataKatalogTest extends TestCase
         $this->get(route('katalog.sumber-data.show', $baru))
             ->assertOk()
             ->assertSee('Dataset Baru')
-            ->assertSee('<td>Dibuat</td>', false);
+            ->assertSee('Dibuat');
+    }
+
+    public function test_halaman_katalog_memakai_layout_global_admin(): void
+    {
+        $this->get(route('katalog.sumber-data.index'))
+            ->assertOk()
+            ->assertSee('PBI-03 · Admin')
+            ->assertSee('Sistem demo')
+            ->assertSee('Admin RimbaWatch')
+            ->assertSee('Mode demo akademik')
+            ->assertSee('aria-disabled="true"', false);
+    }
+
+    public function test_form_tambah_dan_ubah_dirender_dalam_layout(): void
+    {
+        $this->get(route('katalog.sumber-data.create'))
+            ->assertOk()
+            ->assertSee('Tambah Sumber Data')
+            ->assertSee('PBI-03 · Admin')
+            ->assertSee('Batal');
+
+        $sumber = SumberData::factory()->create(['nama_sumber' => 'Dataset Ubah']);
+
+        $this->get(route('katalog.sumber-data.edit', $sumber))
+            ->assertOk()
+            ->assertSee('Ubah Sumber Data')
+            ->assertSee('Dataset Ubah')
+            ->assertSee('Simpan');
     }
 }

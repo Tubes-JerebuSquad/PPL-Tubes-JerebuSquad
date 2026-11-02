@@ -1,80 +1,121 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Katalog Sumber Data</title>
-</head>
-<body>
-    <h1>Katalog Sumber Data</h1>
+@extends('layouts.app')
 
-    @if (session('status'))
-        <p role="status">{{ session('status') }}</p>
-    @endif
+@section('title', 'Sumber Data — RimbaWatch')
+@section('breadcrumb', 'Sumber Data')
 
-    @if ($errors->any())
-        <ul>
-            @foreach ($errors->all() as $pesan)
-                <li>{{ $pesan }}</li>
-            @endforeach
-        </ul>
-    @endif
+@section('content')
+    <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-rimba-600">PBI-03 · Admin</p>
+            <h1 class="mt-2 text-3xl font-bold tracking-tight text-rimba-900">Sumber Data</h1>
+            <p class="mt-2 max-w-2xl text-sm text-ink-500">
+                Kelola metadata, keterlacakan sumber, dan status dataset yang dipakai RimbaWatch.
+            </p>
+        </div>
 
-    <p><a href="{{ route('katalog.sumber-data.create') }}">Tambah sumber data</a></p>
+        <a href="{{ route('katalog.sumber-data.create') }}" class="btn-primary shrink-0">
+            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <path d="M10 4v12M4 10h12" />
+            </svg>
+            Tambah dataset
+        </a>
+    </div>
 
-    <form method="GET" action="{{ route('katalog.sumber-data.index') }}">
-        <p>
-            <label for="cari">Cari nama</label>
-            <input id="cari" name="cari" type="search" value="{{ request('cari') }}">
-        </p>
-        <p>
-            <label for="jenis_sumber">Jenis</label>
-            <select id="jenis_sumber" name="jenis_sumber">
-                <option value="">Semua</option>
-                <option value="INTERNAL" @selected(request('jenis_sumber') === 'INTERNAL')>Internal</option>
-                <option value="EKSTERNAL" @selected(request('jenis_sumber') === 'EKSTERNAL')>Eksternal</option>
-            </select>
-        </p>
-        <p>
-            <label for="is_aktif">Status</label>
-            <select id="is_aktif" name="is_aktif">
-                <option value="">Semua</option>
-                <option value="1" @selected(request('is_aktif') === '1')>Aktif</option>
-                <option value="0" @selected(request('is_aktif') === '0')>Nonaktif</option>
-            </select>
-        </p>
-        <button type="submit">Terapkan</button>
-    </form>
+    <x-ui.card class="overflow-hidden">
+        <form method="GET" action="{{ route('katalog.sumber-data.index') }}" class="flex flex-col gap-3 border-b border-line p-5 lg:flex-row lg:items-end">
+            <div class="flex-1">
+                <label for="cari" class="field-label">Cari nama dataset</label>
+                <input
+                    id="cari"
+                    name="cari"
+                    type="search"
+                    value="{{ request('cari') }}"
+                    placeholder="Cari nama sumber data..."
+                    class="field-input"
+                >
+            </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Nama</th>
-                <th>Jenis</th>
-                <th>Penyedia</th>
-                <th>Status</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($sumberData as $sumber)
-                <tr>
-                    <td>
-                        <a href="{{ route('katalog.sumber-data.show', $sumber) }}">{{ $sumber->nama_sumber }}</a>
-                    </td>
-                    <td>{{ $sumber->jenis_sumber }}</td>
-                    <td>{{ $sumber->nama_penyedia }}</td>
-                    <td>{{ $sumber->is_aktif ? 'Aktif' : 'Nonaktif' }}</td>
-                    <td><a href="{{ route('katalog.sumber-data.edit', $sumber) }}">Ubah</a></td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="5">Belum ada sumber data.</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+            <div class="lg:w-44">
+                <label for="jenis_sumber" class="field-label">Jenis</label>
+                <select id="jenis_sumber" name="jenis_sumber" class="field-input">
+                    <option value="">Semua</option>
+                    <option value="INTERNAL" @selected(request('jenis_sumber') === 'INTERNAL')>Internal</option>
+                    <option value="EKSTERNAL" @selected(request('jenis_sumber') === 'EKSTERNAL')>Eksternal</option>
+                </select>
+            </div>
 
-    {{ $sumberData->links() }}
-</body>
-</html>
+            <div class="lg:w-44">
+                <label for="is_aktif" class="field-label">Status</label>
+                <select id="is_aktif" name="is_aktif" class="field-input">
+                    <option value="">Semua</option>
+                    <option value="1" @selected(request('is_aktif') === '1')>Aktif</option>
+                    <option value="0" @selected(request('is_aktif') === '0')>Nonaktif</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-secondary">Terapkan</button>
+        </form>
+
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[760px] text-left text-sm">
+                <thead>
+                    <tr class="border-b border-line text-[11px] uppercase tracking-[0.12em] text-ink-400">
+                        <th scope="col" class="px-5 py-3 font-semibold">Nama dataset</th>
+                        <th scope="col" class="px-5 py-3 font-semibold">Format</th>
+                        <th scope="col" class="px-5 py-3 font-semibold">Pembaruan terakhir</th>
+                        <th scope="col" class="px-5 py-3 font-semibold">Status</th>
+                        <th scope="col" class="px-5 py-3 text-right font-semibold">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-line">
+                    @forelse ($sumberData as $sumber)
+                        <tr class="transition hover:bg-rimba-50/70">
+                            <td class="px-5 py-4">
+                                <a href="{{ route('katalog.sumber-data.show', $sumber) }}" class="font-semibold text-ink-900 hover:text-rimba-600">
+                                    {{ $sumber->nama_sumber }}
+                                </a>
+                                <p class="mt-0.5 text-xs text-ink-400">{{ $sumber->nama_penyedia }}</p>
+                            </td>
+                            <td class="px-5 py-4 text-ink-500">{{ $sumber->format_data }}</td>
+                            <td class="px-5 py-4 text-ink-500">
+                                {{ $sumber->terakhir_diambil_pada?->format('d M Y • H:i') ?? 'Belum pernah' }}
+                            </td>
+                            <td class="px-5 py-4">
+                                <div class="flex flex-wrap gap-1.5">
+                                    <x-ui.badge :variant="$sumber->is_aktif ? 'success' : 'danger'">
+                                        {{ $sumber->is_aktif ? 'Aktif' : 'Nonaktif' }}
+                                    </x-ui.badge>
+
+                                    <x-ui.badge :variant="$sumber->jenis_sumber === \App\Models\SumberData::JENIS_INTERNAL ? 'info' : 'neutral'">
+                                        {{ ucfirst(strtolower($sumber->jenis_sumber)) }}
+                                    </x-ui.badge>
+
+                                    @if ($sumber->status_kebaruan !== 'UNKNOWN')
+                                        <x-ui.badge :variant="$sumber->status_kebaruan === 'FRESH' ? 'success' : 'warning'">
+                                            {{ $sumber->status_kebaruan }}
+                                        </x-ui.badge>
+                                    @endif
+                                </div>
+                            </td>
+                            <td class="px-5 py-4 text-right">
+                                <a href="{{ route('katalog.sumber-data.edit', $sumber) }}" class="text-sm font-semibold text-rimba-600 hover:text-rimba-700">
+                                    Ubah
+                                </a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-5 py-12 text-center text-sm text-ink-400">Belum ada sumber data.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        @if ($sumberData->hasPages())
+            <div class="border-t border-line px-5 py-4">
+                {{ $sumberData->links() }}
+            </div>
+        @endif
+    </x-ui.card>
+@endsection

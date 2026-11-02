@@ -274,7 +274,8 @@ class SumberDataValidasiTest extends TestCase
             ->assertOk()
             ->assertSee('Hotspot NASA FIRMS')
             ->assertSee('EPSG:4326')
-            ->assertSee('01-11-2026 08:30')
+            ->assertSee('01 Nov 2026')
+            ->assertSee('08:30')
             ->assertSee('FRESH');
     }
 
