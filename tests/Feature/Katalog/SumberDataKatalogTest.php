@@ -108,4 +108,47 @@ class SumberDataKatalogTest extends TestCase
             ->assertSee('Dataset Ubah')
             ->assertSee('Simpan');
     }
+
+    public function test_label_metadata_belum_lengkap_memakai_nama_field_yang_mudah_dibaca(): void
+    {
+        $sumber = SumberData::factory()->make([
+            'url_sumber' => null,
+            'deskripsi_cakupan' => null,
+            'interval_penyegaran_jam' => null,
+        ]);
+
+        $this->assertSame(
+            ['URL sumber', 'Deskripsi cakupan', 'Interval penyegaran'],
+            $sumber->labelMetadataBelumLengkap(),
+        );
+    }
+
+    public function test_tombol_aktivasi_nonaktif_dan_menampilkan_field_yang_kurang(): void
+    {
+        $sumber = SumberData::factory()->create([
+            'url_sumber' => null,
+            'deskripsi_cakupan' => null,
+            'interval_penyegaran_jam' => null,
+            'is_aktif' => false,
+        ]);
+
+        $this->get(route('katalog.sumber-data.show', $sumber))
+            ->assertOk()
+            ->assertSee('Belum bisa diaktifkan')
+            ->assertSee('Lengkapi metadata wajib berikut:')
+            ->assertSee('Lengkapi metadata')
+            ->assertSee('cursor-not-allowed', false)
+            ->assertSee('aria-disabled="true"', false)
+            ->assertDontSee(route('katalog.sumber-data.aktifkan', $sumber), false);
+    }
+
+    public function test_tombol_aktivasi_tersedia_bila_metadata_lengkap(): void
+    {
+        $sumber = SumberData::factory()->create(['is_aktif' => false]);
+
+        $this->get(route('katalog.sumber-data.show', $sumber))
+            ->assertOk()
+            ->assertDontSee('Belum bisa diaktifkan')
+            ->assertSee(route('katalog.sumber-data.aktifkan', $sumber), false);
+    }
 }

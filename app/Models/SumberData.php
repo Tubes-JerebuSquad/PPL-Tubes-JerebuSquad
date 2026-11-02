@@ -56,6 +56,24 @@ class SumberData extends Model
         'interval_penyegaran_jam',
     ];
 
+    /**
+     * Label yang ditampilkan ke pengguna untuk setiap field metadata.
+     *
+     * @var array<string, string>
+     */
+    public const LABEL_FIELD = [
+        'nama_sumber' => 'Nama sumber',
+        'nama_penyedia' => 'Nama penyedia',
+        'nama_lisensi' => 'Nama lisensi',
+        'format_data' => 'Format data',
+        'kode_crs' => 'Kode CRS',
+        'status_kualitas' => 'Status kualitas',
+        'url_sumber' => 'URL sumber',
+        'deskripsi_cakupan' => 'Deskripsi cakupan',
+        'periode_mulai' => 'Periode mulai',
+        'interval_penyegaran_jam' => 'Interval penyegaran',
+    ];
+
     protected $table = 'sumber_data';
 
     protected $primaryKey = 'sumber_id';
@@ -144,6 +162,19 @@ class SumberData extends Model
     public function metadataLengkap(): bool
     {
         return $this->metadataBelumLengkap() === [];
+    }
+
+    /**
+     * Label field wajib yang masih kosong, siap ditampilkan di halaman detail.
+     *
+     * @return array<int, string>
+     */
+    public function labelMetadataBelumLengkap(): array
+    {
+        return array_map(
+            fn (string $field): string => self::LABEL_FIELD[$field] ?? $field,
+            $this->metadataBelumLengkap(),
+        );
     }
 
     /**

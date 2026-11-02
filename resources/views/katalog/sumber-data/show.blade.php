@@ -4,6 +4,8 @@
 @section('breadcrumb', 'Sumber Data / Detail')
 
 @section('content')
+    @php($metadataKurang = $sumberData->labelMetadataBelumLengkap())
+
     <div class="mb-8">
         <a href="{{ route('katalog.sumber-data.index') }}" class="inline-flex items-center gap-1.5 text-sm font-medium text-ink-500 transition hover:text-rimba-600">
             <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -164,6 +166,30 @@
 
                         <button type="submit" class="btn-danger w-full">Nonaktifkan dataset</button>
                     </form>
+                @elseif ($metadataKurang !== [])
+                    <div class="mt-4 rounded-xl border border-amber-ink/20 bg-amber-soft px-4 py-3 text-sm text-amber-ink" role="status">
+                        <p class="font-semibold">Belum bisa diaktifkan</p>
+                        <p class="mt-1">Lengkapi metadata wajib berikut:</p>
+                        <ul class="mt-2 list-inside list-disc space-y-0.5">
+                            @foreach ($metadataKurang as $label)
+                                <li>{{ $label }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn-primary mt-4 w-full cursor-not-allowed opacity-50"
+                        disabled
+                        aria-disabled="true"
+                        title="Lengkapi metadata wajib terlebih dahulu"
+                    >
+                        Aktifkan dataset
+                    </button>
+
+                    <a href="{{ route('katalog.sumber-data.edit', $sumberData) }}" class="btn-secondary mt-2 w-full">
+                        Lengkapi metadata
+                    </a>
                 @else
                     <form method="POST" action="{{ route('katalog.sumber-data.aktifkan', $sumberData) }}" class="mt-4">
                         @csrf
