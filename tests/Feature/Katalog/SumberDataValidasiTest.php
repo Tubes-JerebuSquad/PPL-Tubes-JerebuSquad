@@ -264,11 +264,30 @@ class SumberDataValidasiTest extends TestCase
 
     public function test_show_menampilkan_metadata_dataset(): void
     {
-        $sumber = SumberData::factory()->create(['nama_sumber' => 'Hotspot NASA FIRMS']);
+        $sumber = SumberData::factory()->create([
+            'nama_sumber' => 'Hotspot NASA FIRMS',
+            'terakhir_diambil_pada' => '2026-11-01 08:30:00',
+            'status_kebaruan' => 'FRESH',
+        ]);
 
         $this->get(route('katalog.sumber-data.show', $sumber))
             ->assertOk()
             ->assertSee('Hotspot NASA FIRMS')
-            ->assertSee('EPSG:4326');
+            ->assertSee('EPSG:4326')
+            ->assertSee('01-11-2026 08:30')
+            ->assertSee('FRESH');
+    }
+
+    public function test_show_menampilkan_data_belum_pernah_diambil(): void
+    {
+        $sumber = SumberData::factory()->create([
+            'terakhir_diambil_pada' => null,
+            'status_kebaruan' => 'UNKNOWN',
+        ]);
+
+        $this->get(route('katalog.sumber-data.show', $sumber))
+            ->assertOk()
+            ->assertSee('Belum pernah diambil')
+            ->assertSee('Belum diketahui');
     }
 }

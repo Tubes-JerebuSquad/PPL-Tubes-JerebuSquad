@@ -89,6 +89,18 @@
 
         <dt>Dibuat oleh</dt>
         <dd>{{ $sumberData->pembuat?->nama_lengkap ?? '-' }}</dd>
+
+        <dt>Dibuat pada</dt>
+        <dd>{{ $sumberData->dibuat_pada?->format('d-m-Y H:i') ?? '-' }}</dd>
+
+        <dt>Metadata terakhir diperbarui</dt>
+        <dd>{{ $sumberData->diperbarui_pada?->format('d-m-Y H:i') ?? '-' }}</dd>
+
+        <dt>Data terakhir diambil dari sumber</dt>
+        <dd>{{ $sumberData->terakhir_diambil_pada?->format('d-m-Y H:i') ?? 'Belum pernah diambil' }}</dd>
+
+        <dt>Status kebaruan data</dt>
+        <dd>{{ $sumberData->status_kebaruan === 'UNKNOWN' ? 'Belum diketahui' : $sumberData->status_kebaruan }}</dd>
     </dl>
 
     <h2>Riwayat perubahan</h2>
