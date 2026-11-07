@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('tugas_inspeksi', function (Blueprint $table) {
             $table->id('tugas_inspeksi_id');
-            $table->foreignId('laporan_id')->constrained('laporan', 'laporan_id');
+            $table->foreignId('laporan_id')->constrained('laporan');
             $table->foreignId('ditugaskan_kepada')->constrained('pengguna', 'pengguna_id');
             $table->foreignId('ditugaskan_oleh')->constrained('pengguna', 'pengguna_id');
             $table->string('prioritas', 30);
