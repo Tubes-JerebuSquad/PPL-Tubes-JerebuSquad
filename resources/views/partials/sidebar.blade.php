@@ -1,38 +1,123 @@
 @php
     $mobile = $mobile ?? false;
+    $user = auth()->user();
+    $role = strtolower(trim($user?->peran?->nama_peran ?? ''));
 
-    $menu = [
-        [
-            'label' => 'Dashboard',
-            'route' => null,
-            'pola' => null,
-            'ikon' => 'grid',
-        ],
-        [
-            'label' => 'Data Kawasan',
-            'route' => null,
-            'pola' => null,
-            'ikon' => 'map',
-        ],
-        [
-            'label' => 'Sumber Data',
-            'route' => 'katalog.sumber-data.index',
-            'pola' => 'katalog.sumber-data.*',
-            'ikon' => 'database',
-        ],
-        [
-            'label' => 'Pengguna & Akses',
-            'route' => null,
-            'pola' => null,
-            'ikon' => 'users',
-        ],
-        [
-            'label' => 'Pengaturan',
-            'route' => null,
-            'pola' => null,
-            'ikon' => 'gear',
-        ],
-    ];
+    if ($role === 'admin') {
+        $menu = [
+            [
+                'label' => 'Dashboard',
+                'route' => 'admin.dashboard',
+                'pola' => 'admin.dashboard*',
+                'ikon' => 'grid',
+            ],
+            [
+                'label' => 'Data Kawasan',
+                'route' => null,
+                'pola' => null,
+                'ikon' => 'map',
+            ],
+            [
+                'label' => 'Sumber Data',
+                'route' => 'katalog.sumber-data.index',
+                'pola' => 'katalog.sumber-data.*',
+                'ikon' => 'database',
+            ],
+            [
+                'label' => 'Pengguna & Akses',
+                'route' => null,
+                'pola' => null,
+                'ikon' => 'users',
+            ],
+            [
+                'label' => 'Pengaturan',
+                'route' => null,
+                'pola' => null,
+                'ikon' => 'gear',
+            ],
+        ];
+    } elseif ($role === 'pengawas') {
+        $menu = [
+            [
+                'label' => 'Dashboard',
+                'route' => 'pengawas.dashboard',
+                'pola' => 'pengawas.dashboard*',
+                'ikon' => 'grid',
+            ],
+            [
+                'label' => 'Verifikasi Laporan',
+                'route' => null,
+                'pola' => null,
+                'ikon' => 'database',
+            ],
+            [
+                'label' => 'Penugasan Lapangan',
+                'route' => null,
+                'pola' => null,
+                'ikon' => 'users',
+            ],
+            [
+                'label' => 'Pantauan Titik Panas',
+                'route' => null,
+                'pola' => null,
+                'ikon' => 'map',
+            ],
+        ];
+    } elseif ($role === 'petugas lapangan') {
+        $menu = [
+            [
+                'label' => 'Dashboard',
+                'route' => 'petugas.dashboard',
+                'pola' => 'petugas.dashboard*',
+                'ikon' => 'grid',
+            ],
+            [
+                'label' => 'Surat Tugas Inspeksi',
+                'route' => null,
+                'pola' => null,
+                'ikon' => 'database',
+            ],
+            [
+                'label' => 'Input Hasil Lapangan',
+                'route' => null,
+                'pola' => null,
+                'ikon' => 'map',
+            ],
+            [
+                'label' => 'Riwayat Inspeksi',
+                'route' => null,
+                'pola' => null,
+                'ikon' => 'users',
+            ],
+        ];
+    } else {
+        $menu = [
+            [
+                'label' => 'Dashboard Warga',
+                'route' => 'masyarakat.dashboard',
+                'pola' => 'masyarakat.dashboard*',
+                'ikon' => 'grid',
+            ],
+            [
+                'label' => 'Laporan Saya',
+                'route' => null,
+                'pola' => null,
+                'ikon' => 'database',
+            ],
+            [
+                'label' => 'Buat Pengaduan',
+                'route' => null,
+                'pola' => null,
+                'ikon' => 'map',
+            ],
+            [
+                'label' => 'Kegiatan Konservasi',
+                'route' => null,
+                'pola' => null,
+                'ikon' => 'users',
+            ],
+        ];
+    }
 @endphp
 
 @if ($mobile)
