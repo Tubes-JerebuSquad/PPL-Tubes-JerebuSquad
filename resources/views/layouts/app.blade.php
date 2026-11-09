@@ -4,7 +4,129 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'RimbaWatch')</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+        <!-- Tailwind CSS CDN Fallback (saat Vite belum di-build) -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        colors: {
+                            rimba: {
+                                950: '#10291e',
+                                900: '#173e2d',
+                                800: '#1f4a36',
+                                700: '#225a38',
+                                600: '#2f7a50',
+                                500: '#3f8f63',
+                                100: '#e7f2e6',
+                                50: '#f4f7f4',
+                            },
+                            ink: {
+                                900: '#173e2d',
+                                700: '#34463a',
+                                500: '#516457',
+                                400: '#6b776f',
+                            },
+                            line: {
+                                DEFAULT: '#e1e8e2',
+                                strong: '#d8e1d9',
+                            },
+                            danger: {
+                                soft: '#fbe9e7',
+                                ink: '#914b41',
+                            }
+                        }
+                    }
+                }
+            }
+        </script>
+        <style>
+            .btn-primary {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                border-radius: 0.5rem;
+                background-color: #2f7a50;
+                padding: 0.625rem 1rem;
+                font-size: 0.875rem;
+                font-weight: 600;
+                color: white;
+                transition: all 0.15s ease;
+            }
+            .btn-primary:hover {
+                background-color: #225a38;
+            }
+            .btn-secondary {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                border-radius: 0.5rem;
+                border: 1px solid #d8e1d9;
+                background-color: white;
+                padding: 0.625rem 1rem;
+                font-size: 0.875rem;
+                font-weight: 600;
+                color: #34463a;
+                transition: all 0.15s ease;
+            }
+            .btn-danger {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                border-radius: 0.5rem;
+                border: 1px solid rgba(145, 75, 65, 0.3);
+                background-color: white;
+                padding: 0.625rem 1rem;
+                font-size: 0.875rem;
+                font-weight: 600;
+                color: #914b41;
+                transition: all 0.15s ease;
+            }
+            .btn-danger:hover {
+                background-color: #fbe9e7;
+            }
+            .nav-item {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                border-radius: 0.5rem;
+                padding: 0.625rem 0.75rem;
+                font-size: 0.875rem;
+                font-weight: 500;
+                transition: all 0.15s ease;
+            }
+        </style>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const sidebar = document.getElementById('sidebar-mobile');
+                if (sidebar) {
+                    const openers = document.querySelectorAll('[data-buka-sidebar]');
+                    const closers = document.querySelectorAll('[data-tutup-sidebar]');
+                    const setExpanded = (value) => {
+                        openers.forEach((button) => button.setAttribute('aria-expanded', String(value)));
+                    };
+                    openers.forEach((button) => {
+                        button.addEventListener('click', () => {
+                            if (!sidebar.open) sidebar.showModal();
+                            setExpanded(true);
+                        });
+                    });
+                    closers.forEach((button) => button.addEventListener('click', () => sidebar.close()));
+                    sidebar.addEventListener('click', (event) => {
+                        if (event.target === sidebar) sidebar.close();
+                    });
+                    sidebar.addEventListener('close', () => setExpanded(false));
+                    sidebar.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => sidebar.close()));
+                }
+            });
+        </script>
+    @endif
 </head>
 <body class="min-h-screen bg-rimba-50 font-sans text-ink-700 antialiased">
     <a href="#konten-utama" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-rimba-700 focus:shadow">

@@ -59,7 +59,22 @@ class Pengguna extends Authenticatable
      */
     public function isAdmin(): bool
     {
-        return $this->peran?->nama_peran === 'Admin';
+        return strcasecmp($this->peran?->nama_peran ?? '', 'Admin') === 0;
+    }
+
+    public function isPengawas(): bool
+    {
+        return strcasecmp($this->peran?->nama_peran ?? '', 'Pengawas') === 0;
+    }
+
+    public function isPetugasLapangan(): bool
+    {
+        return strcasecmp($this->peran?->nama_peran ?? '', 'Petugas Lapangan') === 0;
+    }
+
+    public function isMasyarakat(): bool
+    {
+        return strcasecmp($this->peran?->nama_peran ?? '', 'Masyarakat') === 0;
     }
 
     public function isAktif(): bool
