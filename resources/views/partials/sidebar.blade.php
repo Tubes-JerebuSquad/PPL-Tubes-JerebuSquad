@@ -20,10 +20,10 @@
             'pola' => 'katalog.sumber-data.*',
             'ikon' => 'database',
         ],
-        [
+                [
             'label' => 'Pengguna & Akses',
-            'route' => null,
-            'pola' => null,
+            'route' => 'admin.pengguna.index',
+            'pola' => 'admin.pengguna.*',
             'ikon' => 'users',
         ],
         [

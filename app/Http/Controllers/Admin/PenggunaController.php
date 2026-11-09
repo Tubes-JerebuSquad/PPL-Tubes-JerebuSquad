@@ -29,6 +29,13 @@ class PenggunaController extends Controller
         ]);
     }
 
+    public function create(): View
+    {
+        return view('admin.pengguna.create', [
+            'daftarPeran' => Peran::orderBy('nama_peran')->get(),
+        ]);
+    }
+
     public function store(SimpanPenggunaRequest $request): RedirectResponse
     {
         $data = $request->validated();
@@ -41,6 +48,14 @@ class PenggunaController extends Controller
         return redirect()
             ->route('admin.pengguna.index')
             ->with('status', 'Pengguna berhasil ditambahkan.');
+    }
+
+    public function edit(Pengguna $pengguna): View
+    {
+        return view('admin.pengguna.edit', [
+            'pengguna' => $pengguna,
+            'daftarPeran' => Peran::orderBy('nama_peran')->get(),
+        ]);
     }
 
     public function update(UbahPenggunaRequest $request, Pengguna $pengguna): RedirectResponse
