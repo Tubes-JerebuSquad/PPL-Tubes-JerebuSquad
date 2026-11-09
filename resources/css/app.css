@@ -6,4 +6,54 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    --color-rimba-950: #10291e;
+    --color-rimba-900: #173e2d;
+    --color-rimba-800: #1f4a36;
+    --color-rimba-700: #225a38;
+    --color-rimba-600: #2f7a50;
+    --color-rimba-500: #3f8f63;
+    --color-rimba-100: #e7f2e6;
+    --color-rimba-50: #f4f7f4;
+
+    --color-ink-900: #173e2d;
+    --color-ink-700: #34463a;
+    --color-ink-500: #516457;
+    --color-ink-400: #6b776f;
+
+    --color-line: #e1e8e2;
+    --color-line-strong: #d8e1d9;
+
+    --color-amber-soft: #fff2d6;
+    --color-amber-ink: #855b16;
+    --color-danger-soft: #fbe9e7;
+    --color-danger-ink: #914b41;
+    --color-info-soft: #e8eef9;
+    --color-info-ink: #2f5c9e;
+}
+
+@layer components {
+    .field-label {
+        @apply mb-1.5 block text-sm font-medium text-ink-700;
+    }
+
+    .field-input {
+        @apply w-full rounded-lg border border-line-strong bg-white px-3.5 py-2.5 text-sm text-ink-900 outline-none transition placeholder:text-ink-400 focus:border-rimba-600 focus:ring-2 focus:ring-rimba-600/20;
+    }
+
+    .btn-primary {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg bg-rimba-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-rimba-700 focus:outline-none focus:ring-2 focus:ring-rimba-600/30;
+    }
+
+    .btn-secondary {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg border border-line-strong bg-white px-4 py-2.5 text-sm font-semibold text-ink-700 transition hover:bg-rimba-50 focus:outline-none focus:ring-2 focus:ring-rimba-600/20;
+    }
+
+    .btn-danger {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg border border-danger-ink/30 bg-white px-4 py-2.5 text-sm font-semibold text-danger-ink transition hover:bg-danger-soft focus:outline-none focus:ring-2 focus:ring-danger-ink/20;
+    }
+
+    .nav-item {
+        @apply flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition;
+    }
 }
