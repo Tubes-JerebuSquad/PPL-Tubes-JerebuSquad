@@ -99,8 +99,8 @@
                 </div>
             </div>
         @else
-            {{-- Mobile: card list agar tidak perlu scroll horizontal --}}
-            <ul class="divide-y divide-line md:hidden" aria-label="Daftar sumber data">
+            {{-- Mobile & tablet: card list agar tidak perlu scroll horizontal --}}
+            <ul class="divide-y divide-line lg:hidden" aria-label="Daftar sumber data">
                 @foreach ($sumberData as $sumber)
                     <li class="p-5">
                         <div class="flex items-start justify-between gap-3">
@@ -136,36 +136,36 @@
                 @endforeach
             </ul>
 
-            {{-- Tablet & desktop: tabel --}}
-            <div class="hidden overflow-x-auto md:block">
-                <table class="w-full min-w-[760px] text-left text-sm">
+            {{-- Desktop: tabel --}}
+            <div class="hidden lg:block">
+                <table class="w-full min-w-[640px] text-left text-sm">
                     <caption class="sr-only">Daftar sumber data</caption>
                     <thead>
                         <tr class="border-b border-line text-[11px] uppercase tracking-[0.12em] text-ink-400">
-                            <th scope="col" class="px-5 py-3 font-semibold">Nama dataset</th>
-                            <th scope="col" class="px-5 py-3 font-semibold">Format</th>
-                            <th scope="col" class="px-5 py-3 font-semibold">Pembaruan terakhir</th>
-                            <th scope="col" class="px-5 py-3 font-semibold">Status</th>
-                            <th scope="col" class="px-5 py-3 text-right font-semibold">Aksi</th>
+                            <th scope="col" class="px-4 py-3 font-semibold">Nama dataset</th>
+                            <th scope="col" class="px-4 py-3 font-semibold">Format</th>
+                            <th scope="col" class="px-4 py-3 font-semibold">Pembaruan terakhir</th>
+                            <th scope="col" class="px-4 py-3 font-semibold">Status</th>
+                            <th scope="col" class="px-4 py-3 text-right font-semibold">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-line">
                         @foreach ($sumberData as $sumber)
                             <tr class="transition hover:bg-rimba-50/70">
-                                <td class="px-5 py-4">
+                                <td class="px-4 py-4">
                                     <a href="{{ route('katalog.sumber-data.show', $sumber) }}" class="font-semibold text-ink-900 hover:text-rimba-600">
                                         {{ $sumber->nama_sumber }}
                                     </a>
                                     <p class="mt-0.5 text-xs text-ink-400">{{ $sumber->nama_penyedia }}</p>
                                 </td>
-                                <td class="px-5 py-4 text-ink-500">{{ $sumber->format_data }}</td>
-                                <td class="px-5 py-4 text-ink-500">
+                                <td class="px-4 py-4 text-ink-500">{{ $sumber->format_data }}</td>
+                                <td class="px-4 py-4 text-ink-500">
                                     {{ $sumber->terakhir_diambil_pada?->format('d M Y • H:i') ?? 'Belum pernah' }}
                                 </td>
-                                <td class="px-5 py-4">
+                                <td class="px-4 py-4">
                                     @include('katalog.sumber-data._badges', ['sumber' => $sumber])
                                 </td>
-                                <td class="px-5 py-4 text-right">
+                                <td class="px-4 py-4 text-right">
                                     <a href="{{ route('katalog.sumber-data.edit', $sumber) }}" class="text-sm font-semibold text-rimba-600 hover:text-rimba-700">
                                         Ubah
                                     </a>

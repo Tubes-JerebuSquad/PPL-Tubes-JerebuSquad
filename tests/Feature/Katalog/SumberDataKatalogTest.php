@@ -224,14 +224,15 @@ class SumberDataKatalogTest extends TestCase
             ->assertSee('confirm(', false);
     }
 
-    public function test_katalog_menyediakan_daftar_card_untuk_mobile(): void
+    public function test_katalog_menyediakan_daftar_card_untuk_mobile_dan_tablet(): void
     {
         SumberData::factory()->create(['nama_sumber' => 'Dataset Mobile']);
 
         $this->get(route('katalog.sumber-data.index'))
             ->assertOk()
-            ->assertSee('md:hidden', false)
-            ->assertSee('hidden overflow-x-auto md:block', false)
+            ->assertSee('lg:hidden', false)
+            ->assertSee('hidden lg:block', false)
+            ->assertDontSee('md:hidden', false)
             ->assertSee('Daftar sumber data')
             ->assertSee('Dataset Mobile');
     }
