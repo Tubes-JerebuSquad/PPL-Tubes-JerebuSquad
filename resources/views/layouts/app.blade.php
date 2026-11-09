@@ -7,13 +7,29 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-rimba-50 font-sans text-ink-700 antialiased">
+    <a href="#konten-utama" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-rimba-700 focus:shadow">
+        Lewati ke konten
+    </a>
+
     <div class="flex min-h-screen">
-        @include('partials.sidebar')
+        <aside class="hidden w-64 shrink-0 flex-col bg-rimba-900 px-4 py-5 lg:flex">
+            @include('partials.sidebar')
+        </aside>
+
+        <dialog
+            id="sidebar-mobile"
+            class="m-0 h-full max-h-none w-72 max-w-[85vw] bg-transparent p-0 backdrop:bg-rimba-950/50 lg:hidden"
+            aria-label="Menu navigasi"
+        >
+            <div class="flex h-full w-full flex-col overflow-y-auto bg-rimba-900 px-4 py-5">
+                @include('partials.sidebar', ['mobile' => true])
+            </div>
+        </dialog>
 
         <div class="flex min-w-0 flex-1 flex-col">
             @include('partials.header')
 
-            <main class="flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+            <main id="konten-utama" class="flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
                 @if (session('status'))
                     <div class="mb-6 flex items-start gap-3 rounded-xl border border-rimba-600/20 bg-rimba-100 px-4 py-3 text-sm font-medium text-rimba-700" role="status">
                         <svg class="mt-0.5 h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -23,7 +39,7 @@
                     </div>
                 @endif
 
-                @if ($errors->any())
+                @if (isset($errors) && $errors->any())
                     <div class="mb-6 rounded-xl border border-danger-ink/20 bg-danger-soft px-4 py-3 text-sm text-danger-ink" role="alert">
                         <p class="font-semibold">Periksa kembali isian berikut:</p>
                         <ul class="mt-2 list-inside list-disc space-y-1">
