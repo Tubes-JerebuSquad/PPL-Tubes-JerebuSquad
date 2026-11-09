@@ -18,6 +18,18 @@ enum StatusKualitas: string
     }
 
     /**
+     * Varian badge yang dipakai di tampilan katalog.
+     */
+    public function variant(): string
+    {
+        return match ($this) {
+            self::VERIFIED => 'success',
+            self::NEEDS_REVIEW => 'warning',
+            self::UNKNOWN => 'neutral',
+        };
+    }
+
+    /**
      * @return array<string, string>
      */
     public static function pilihan(): array

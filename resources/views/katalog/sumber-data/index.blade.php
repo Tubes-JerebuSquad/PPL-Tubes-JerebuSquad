@@ -4,6 +4,10 @@
 @section('breadcrumb', 'Sumber Data')
 
 @section('content')
+    @php
+        $adaFilter = filled(request('cari')) || filled(request('jenis_sumber')) || filled(request('is_aktif'));
+    @endphp
+
     <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
             <p class="text-xs font-semibold uppercase tracking-[0.16em] text-rimba-600">PBI-03 · Admin</p>
@@ -22,38 +26,50 @@
     </div>
 
     <x-ui.card class="overflow-hidden">
-        <form method="GET" action="{{ route('katalog.sumber-data.index') }}" class="flex flex-col gap-3 border-b border-line p-5 lg:flex-row lg:items-end">
+        <form method="GET" action="{{ route('katalog.sumber-data.index') }}" class="flex flex-col gap-3 border-b border-line p-5 md:flex-row md:items-end">
             <div class="flex-1">
                 <label for="cari" class="field-label">Cari nama dataset</label>
                 <input
                     id="cari"
                     name="cari"
                     type="search"
-                    value="{{ request('cari') }}"
+                    value="{{ old('cari', request('cari')) }}"
                     placeholder="Cari nama sumber data..."
                     class="field-input"
+                    @error('cari') aria-invalid="true" aria-describedby="cari-error" @enderror
                 >
+                <x-ui.field-error name="cari" />
             </div>
 
-            <div class="lg:w-44">
+            <div class="md:w-44">
                 <label for="jenis_sumber" class="field-label">Jenis</label>
-                <select id="jenis_sumber" name="jenis_sumber" class="field-input">
+                <select id="jenis_sumber" name="jenis_sumber" class="field-input"
+                    @error('jenis_sumber') aria-invalid="true" aria-describedby="jenis_sumber-error" @enderror>
                     <option value="">Semua</option>
-                    <option value="INTERNAL" @selected(request('jenis_sumber') === 'INTERNAL')>Internal</option>
-                    <option value="EKSTERNAL" @selected(request('jenis_sumber') === 'EKSTERNAL')>Eksternal</option>
+                    <option value="INTERNAL" @selected(old('jenis_sumber', request('jenis_sumber')) === 'INTERNAL')>Internal</option>
+                    <option value="EKSTERNAL" @selected(old('jenis_sumber', request('jenis_sumber')) === 'EKSTERNAL')>Eksternal</option>
                 </select>
+                <x-ui.field-error name="jenis_sumber" />
             </div>
 
-            <div class="lg:w-44">
+            <div class="md:w-44">
                 <label for="is_aktif" class="field-label">Status</label>
-                <select id="is_aktif" name="is_aktif" class="field-input">
+                <select id="is_aktif" name="is_aktif" class="field-input"
+                    @error('is_aktif') aria-invalid="true" aria-describedby="is_aktif-error" @enderror>
                     <option value="">Semua</option>
-                    <option value="1" @selected(request('is_aktif') === '1')>Aktif</option>
-                    <option value="0" @selected(request('is_aktif') === '0')>Nonaktif</option>
+                    <option value="1" @selected(old('is_aktif', request('is_aktif')) === '1')>Aktif</option>
+                    <option value="0" @selected(old('is_aktif', request('is_aktif')) === '0')>Nonaktif</option>
                 </select>
+                <x-ui.field-error name="is_aktif" />
             </div>
 
-            <button type="submit" class="btn-secondary">Terapkan</button>
+            <div class="flex gap-2">
+                <button type="submit" class="btn-secondary">Terapkan</button>
+
+                @if ($adaFilter)
+                    <a href="{{ route('katalog.sumber-data.index') }}" class="btn-secondary">Reset</a>
+                @endif
+            </div>
         </form>
 
         <div class="overflow-x-auto">
@@ -90,11 +106,9 @@
                                         {{ ucfirst(strtolower($sumber->jenis_sumber)) }}
                                     </x-ui.badge>
 
-                                    @if ($sumber->status_kebaruan !== 'UNKNOWN')
-                                        <x-ui.badge :variant="$sumber->status_kebaruan === 'FRESH' ? 'success' : 'warning'">
-                                            {{ $sumber->status_kebaruan }}
-                                        </x-ui.badge>
-                                    @endif
+                                    <x-ui.badge :variant="$sumber->status_kualitas?->variant() ?? 'neutral'">
+                                        {{ $sumber->status_kualitas?->label() ?? 'Belum diketahui' }}
+                                    </x-ui.badge>
                                 </div>
                             </td>
                             <td class="px-5 py-4 text-right">
@@ -105,7 +119,31 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-5 py-12 text-center text-sm text-ink-400">Belum ada sumber data.</td>
+                            <td colspan="5" class="px-5 py-14">
+                                <div class="mx-auto flex max-w-sm flex-col items-center text-center">
+                                    <span class="flex h-12 w-12 items-center justify-center rounded-full bg-rimba-100 text-rimba-600">
+                                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <ellipse cx="12" cy="5.5" rx="7.5" ry="3" />
+                                            <path d="M4.5 5.5v6c0 1.66 3.36 3 7.5 3s7.5-1.34 7.5-3v-6" />
+                                            <path d="M4.5 11.5v6c0 1.66 3.36 3 7.5 3s7.5-1.34 7.5-3v-6" />
+                                        </svg>
+                                    </span>
+
+                                    <p class="mt-4 text-sm font-semibold text-ink-900">Belum ada sumber data.</p>
+
+                                    @if ($adaFilter)
+                                        <p class="mt-1 text-sm text-ink-400">Tidak ada dataset yang cocok dengan filter saat ini.</p>
+                                        <a href="{{ route('katalog.sumber-data.index') }}" class="btn-secondary mt-4">Reset filter</a>
+                                    @else
+                                        <p class="mt-1 text-sm text-ink-400">
+                                            Tambahkan dataset pertama untuk mulai mencatat metadata dan keterlacakan sumber.
+                                        </p>
+                                        <a href="{{ route('katalog.sumber-data.create') }}" class="btn-primary mt-4">
+                                            Tambah dataset
+                                        </a>
+                                    @endif
+                                </div>
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>

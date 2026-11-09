@@ -26,7 +26,9 @@
                     <x-ui.badge :variant="$sumberData->jenis_sumber === \App\Models\SumberData::JENIS_INTERNAL ? 'info' : 'neutral'">
                         {{ ucfirst(strtolower($sumberData->jenis_sumber)) }}
                     </x-ui.badge>
-                    <x-ui.badge variant="neutral">{{ $sumberData->status_kualitas?->label() ?? 'Belum diketahui' }}</x-ui.badge>
+                    <x-ui.badge :variant="$sumberData->status_kualitas?->variant() ?? 'neutral'">
+                        {{ $sumberData->status_kualitas?->label() ?? 'Belum diketahui' }}
+                    </x-ui.badge>
                 </div>
             </div>
 
@@ -155,13 +157,20 @@
                 </p>
 
                 @if ($sumberData->is_aktif)
-                    <form method="POST" action="{{ route('katalog.sumber-data.nonaktifkan', $sumberData) }}" class="mt-4 space-y-3">
+                    <form
+                        method="POST"
+                        action="{{ route('katalog.sumber-data.nonaktifkan', $sumberData) }}"
+                        class="mt-4 space-y-3"
+                        onsubmit="return confirm('Nonaktifkan dataset ini? Dataset tidak akan dipakai hingga diaktifkan kembali.');"
+                    >
                         @csrf
                         @method('PATCH')
 
                         <div>
                             <label for="catatan" class="field-label">Alasan penonaktifan</label>
-                            <input id="catatan" name="catatan" type="text" maxlength="500" placeholder="Opsional" class="field-input">
+                            <input id="catatan" name="catatan" type="text" maxlength="500" placeholder="Opsional" class="field-input"
+                                @error('catatan') aria-invalid="true" aria-describedby="catatan-error" @enderror>
+                            <x-ui.field-error name="catatan" />
                         </div>
 
                         <button type="submit" class="btn-danger w-full">Nonaktifkan dataset</button>

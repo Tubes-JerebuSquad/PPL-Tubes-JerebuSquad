@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Katalog;
 
+use App\Enums\StatusKualitas;
 use App\Models\SumberData;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -150,5 +151,75 @@ class SumberDataKatalogTest extends TestCase
             ->assertOk()
             ->assertDontSee('Belum bisa diaktifkan')
             ->assertSee(route('katalog.sumber-data.aktifkan', $sumber), false);
+    }
+
+    public function test_katalog_menampilkan_badge_status_kualitas_berwarna(): void
+    {
+        SumberData::factory()->create([
+            'nama_sumber' => 'Dataset Terverifikasi',
+            'status_kualitas' => StatusKualitas::VERIFIED,
+        ]);
+        SumberData::factory()->create([
+            'nama_sumber' => 'Dataset Perlu Ditinjau',
+            'status_kualitas' => StatusKualitas::NEEDS_REVIEW,
+        ]);
+
+        $this->get(route('katalog.sumber-data.index'))
+            ->assertOk()
+            ->assertSee('Terverifikasi')
+            ->assertSee('Perlu ditinjau')
+            ->assertSee('bg-amber-soft', false);
+    }
+
+    public function test_empty_state_menampilkan_cta_tambah_dataset(): void
+    {
+        $this->get(route('katalog.sumber-data.index'))
+            ->assertOk()
+            ->assertSee('Belum ada sumber data.')
+            ->assertSee('Tambah dataset')
+            ->assertSee(route('katalog.sumber-data.create'), false)
+            ->assertDontSee('Tidak ada dataset yang cocok dengan filter saat ini.');
+    }
+
+    public function test_empty_state_karena_filter_menampilkan_tombol_reset(): void
+    {
+        SumberData::factory()->create(['nama_sumber' => 'Dataset Lain']);
+
+        $this->get(route('katalog.sumber-data.index', ['cari' => 'tidak-ada']))
+            ->assertOk()
+            ->assertSee('Belum ada sumber data.')
+            ->assertSee('Tidak ada dataset yang cocok dengan filter saat ini.')
+            ->assertSee('Reset filter');
+    }
+
+    public function test_form_menampilkan_error_di_field_terkait(): void
+    {
+        $this->from(route('katalog.sumber-data.create'))
+            ->followingRedirects()
+            ->post(route('katalog.sumber-data.store'), [
+                'nama_sumber' => '',
+                'jenis_sumber' => SumberData::JENIS_EKSTERNAL,
+                'nama_penyedia' => 'NASA',
+                'nama_lisensi' => 'Public Domain',
+                'format_data' => 'CSV',
+                'kode_crs' => '4326',
+                'status_kualitas' => 'VERIFIED',
+            ])
+            ->assertOk()
+            ->assertSee('Nama sumber wajib diisi.')
+            ->assertSee('Kode CRS harus berformat EPSG diikuti 4-6 digit, contoh EPSG:4326.')
+            ->assertSee('aria-invalid="true"', false)
+            ->assertSee('nama_sumber-error', false)
+            ->assertSee('kode_crs-error', false);
+    }
+
+    public function test_detail_meminta_konfirmasi_sebelum_menonaktifkan(): void
+    {
+        $sumber = SumberData::factory()->aktif()->create();
+
+        $this->get(route('katalog.sumber-data.show', $sumber))
+            ->assertOk()
+            ->assertSee('Nonaktifkan dataset')
+            ->assertSee('confirm(', false);
     }
 }
