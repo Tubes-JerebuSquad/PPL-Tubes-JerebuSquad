@@ -178,6 +178,7 @@ class SumberDataKatalogTest extends TestCase
             ->assertSee('Belum ada sumber data.')
             ->assertSee('Tambah dataset')
             ->assertSee(route('katalog.sumber-data.create'), false)
+            ->assertDontSee('Reset filter')
             ->assertDontSee('Tidak ada dataset yang cocok dengan filter saat ini.');
     }
 
@@ -221,5 +222,41 @@ class SumberDataKatalogTest extends TestCase
             ->assertOk()
             ->assertSee('Nonaktifkan dataset')
             ->assertSee('confirm(', false);
+    }
+
+    public function test_katalog_menyediakan_daftar_card_untuk_mobile(): void
+    {
+        SumberData::factory()->create(['nama_sumber' => 'Dataset Mobile']);
+
+        $this->get(route('katalog.sumber-data.index'))
+            ->assertOk()
+            ->assertSee('md:hidden', false)
+            ->assertSee('hidden overflow-x-auto md:block', false)
+            ->assertSee('Daftar sumber data')
+            ->assertSee('Dataset Mobile');
+    }
+
+    public function test_pagination_mempertahankan_filter_aktif(): void
+    {
+        foreach (range(1, 16) as $nomor) {
+            SumberData::factory()->create([
+                'nama_sumber' => sprintf('Dataset Uji %02d', $nomor),
+                'jenis_sumber' => SumberData::JENIS_INTERNAL,
+            ]);
+        }
+
+        $respons = $this->get(route('katalog.sumber-data.index', [
+            'cari' => 'Dataset Uji',
+            'jenis_sumber' => SumberData::JENIS_INTERNAL,
+        ]));
+
+        $respons->assertOk();
+
+        $paginator = $respons->viewData('sumberData');
+
+        $this->assertSame(16, $paginator->total());
+        $this->assertSame(15, $paginator->perPage());
+        $this->assertStringContainsString('cari=Dataset', $paginator->url(2));
+        $this->assertStringContainsString('jenis_sumber=INTERNAL', $paginator->url(2));
     }
 }

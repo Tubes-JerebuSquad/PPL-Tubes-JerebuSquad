@@ -291,4 +291,42 @@ class SumberDataValidasiTest extends TestCase
             ->assertSee('Belum pernah diambil')
             ->assertSee('Belum diketahui');
     }
+
+    public function test_alur_lengkap_aktivasi_dan_penonaktifan(): void
+    {
+        $sumber = SumberData::factory()->create([
+            'url_sumber' => null,
+            'deskripsi_cakupan' => null,
+            'interval_penyegaran_jam' => null,
+            'is_aktif' => false,
+        ]);
+
+        $this->get(route('katalog.sumber-data.show', $sumber))
+            ->assertOk()
+            ->assertSee('Belum bisa diaktifkan');
+
+        $this->put(route('katalog.sumber-data.update', $sumber), $this->dataValid([
+            'nama_sumber' => $sumber->nama_sumber,
+        ]))->assertSessionHasNoErrors();
+
+        $this->patch(route('katalog.sumber-data.aktifkan', $sumber))
+            ->assertSessionHasNoErrors();
+
+        $this->assertTrue($sumber->fresh()->is_aktif);
+
+        $this->patch(route('katalog.sumber-data.nonaktifkan', $sumber), [
+            'catatan' => 'Selesai uji alur',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertFalse($sumber->fresh()->is_aktif);
+        $this->assertDatabaseHas('riwayat_sumber_data', [
+            'sumber_id' => $sumber->sumber_id,
+            'aksi' => 'DIAKTIFKAN',
+        ]);
+        $this->assertDatabaseHas('riwayat_sumber_data', [
+            'sumber_id' => $sumber->sumber_id,
+            'aksi' => 'DINONAKTIFKAN',
+            'catatan' => 'Selesai uji alur',
+        ]);
+    }
 }

@@ -72,83 +72,110 @@
             </div>
         </form>
 
-        <div class="overflow-x-auto">
-            <table class="w-full min-w-[760px] text-left text-sm">
-                <thead>
-                    <tr class="border-b border-line text-[11px] uppercase tracking-[0.12em] text-ink-400">
-                        <th scope="col" class="px-5 py-3 font-semibold">Nama dataset</th>
-                        <th scope="col" class="px-5 py-3 font-semibold">Format</th>
-                        <th scope="col" class="px-5 py-3 font-semibold">Pembaruan terakhir</th>
-                        <th scope="col" class="px-5 py-3 font-semibold">Status</th>
-                        <th scope="col" class="px-5 py-3 text-right font-semibold">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-line">
-                    @forelse ($sumberData as $sumber)
-                        <tr class="transition hover:bg-rimba-50/70">
-                            <td class="px-5 py-4">
+        @if ($sumberData->isEmpty())
+            <div class="px-5 py-14">
+                <div class="mx-auto flex max-w-sm flex-col items-center text-center">
+                    <span class="flex h-12 w-12 items-center justify-center rounded-full bg-rimba-100 text-rimba-600">
+                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <ellipse cx="12" cy="5.5" rx="7.5" ry="3" />
+                            <path d="M4.5 5.5v6c0 1.66 3.36 3 7.5 3s7.5-1.34 7.5-3v-6" />
+                            <path d="M4.5 11.5v6c0 1.66 3.36 3 7.5 3s7.5-1.34 7.5-3v-6" />
+                        </svg>
+                    </span>
+
+                    <p class="mt-4 text-sm font-semibold text-ink-900">Belum ada sumber data.</p>
+
+                    @if ($adaFilter)
+                        <p class="mt-1 text-sm text-ink-400">Tidak ada dataset yang cocok dengan filter saat ini.</p>
+                        <a href="{{ route('katalog.sumber-data.index') }}" class="btn-secondary mt-4">Reset filter</a>
+                    @else
+                        <p class="mt-1 text-sm text-ink-400">
+                            Tambahkan dataset pertama untuk mulai mencatat metadata dan keterlacakan sumber.
+                        </p>
+                        <a href="{{ route('katalog.sumber-data.create') }}" class="btn-primary mt-4">
+                            Tambah dataset
+                        </a>
+                    @endif
+                </div>
+            </div>
+        @else
+            {{-- Mobile: card list agar tidak perlu scroll horizontal --}}
+            <ul class="divide-y divide-line md:hidden" aria-label="Daftar sumber data">
+                @foreach ($sumberData as $sumber)
+                    <li class="p-5">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
                                 <a href="{{ route('katalog.sumber-data.show', $sumber) }}" class="font-semibold text-ink-900 hover:text-rimba-600">
                                     {{ $sumber->nama_sumber }}
                                 </a>
                                 <p class="mt-0.5 text-xs text-ink-400">{{ $sumber->nama_penyedia }}</p>
-                            </td>
-                            <td class="px-5 py-4 text-ink-500">{{ $sumber->format_data }}</td>
-                            <td class="px-5 py-4 text-ink-500">
-                                {{ $sumber->terakhir_diambil_pada?->format('d M Y • H:i') ?? 'Belum pernah' }}
-                            </td>
-                            <td class="px-5 py-4">
-                                <div class="flex flex-wrap gap-1.5">
-                                    <x-ui.badge :variant="$sumber->is_aktif ? 'success' : 'danger'">
-                                        {{ $sumber->is_aktif ? 'Aktif' : 'Nonaktif' }}
-                                    </x-ui.badge>
+                            </div>
 
-                                    <x-ui.badge :variant="$sumber->jenis_sumber === \App\Models\SumberData::JENIS_INTERNAL ? 'info' : 'neutral'">
-                                        {{ ucfirst(strtolower($sumber->jenis_sumber)) }}
-                                    </x-ui.badge>
+                            <a href="{{ route('katalog.sumber-data.edit', $sumber) }}" class="shrink-0 text-sm font-semibold text-rimba-600 hover:text-rimba-700">
+                                Ubah
+                            </a>
+                        </div>
 
-                                    <x-ui.badge :variant="$sumber->status_kualitas?->variant() ?? 'neutral'">
-                                        {{ $sumber->status_kualitas?->label() ?? 'Belum diketahui' }}
-                                    </x-ui.badge>
-                                </div>
-                            </td>
-                            <td class="px-5 py-4 text-right">
-                                <a href="{{ route('katalog.sumber-data.edit', $sumber) }}" class="text-sm font-semibold text-rimba-600 hover:text-rimba-700">
-                                    Ubah
-                                </a>
-                            </td>
+                        <div class="mt-3">
+                            @include('katalog.sumber-data._badges', ['sumber' => $sumber])
+                        </div>
+
+                        <dl class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                            <div>
+                                <dt class="text-ink-400">Format</dt>
+                                <dd class="mt-0.5 font-medium text-ink-700">{{ $sumber->format_data }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-ink-400">Pembaruan terakhir</dt>
+                                <dd class="mt-0.5 font-medium text-ink-700">
+                                    {{ $sumber->terakhir_diambil_pada?->format('d M Y • H:i') ?? 'Belum pernah' }}
+                                </dd>
+                            </div>
+                        </dl>
+                    </li>
+                @endforeach
+            </ul>
+
+            {{-- Tablet & desktop: tabel --}}
+            <div class="hidden overflow-x-auto md:block">
+                <table class="w-full min-w-[760px] text-left text-sm">
+                    <caption class="sr-only">Daftar sumber data</caption>
+                    <thead>
+                        <tr class="border-b border-line text-[11px] uppercase tracking-[0.12em] text-ink-400">
+                            <th scope="col" class="px-5 py-3 font-semibold">Nama dataset</th>
+                            <th scope="col" class="px-5 py-3 font-semibold">Format</th>
+                            <th scope="col" class="px-5 py-3 font-semibold">Pembaruan terakhir</th>
+                            <th scope="col" class="px-5 py-3 font-semibold">Status</th>
+                            <th scope="col" class="px-5 py-3 text-right font-semibold">Aksi</th>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="px-5 py-14">
-                                <div class="mx-auto flex max-w-sm flex-col items-center text-center">
-                                    <span class="flex h-12 w-12 items-center justify-center rounded-full bg-rimba-100 text-rimba-600">
-                                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                            <ellipse cx="12" cy="5.5" rx="7.5" ry="3" />
-                                            <path d="M4.5 5.5v6c0 1.66 3.36 3 7.5 3s7.5-1.34 7.5-3v-6" />
-                                            <path d="M4.5 11.5v6c0 1.66 3.36 3 7.5 3s7.5-1.34 7.5-3v-6" />
-                                        </svg>
-                                    </span>
-
-                                    <p class="mt-4 text-sm font-semibold text-ink-900">Belum ada sumber data.</p>
-
-                                    @if ($adaFilter)
-                                        <p class="mt-1 text-sm text-ink-400">Tidak ada dataset yang cocok dengan filter saat ini.</p>
-                                        <a href="{{ route('katalog.sumber-data.index') }}" class="btn-secondary mt-4">Reset filter</a>
-                                    @else
-                                        <p class="mt-1 text-sm text-ink-400">
-                                            Tambahkan dataset pertama untuk mulai mencatat metadata dan keterlacakan sumber.
-                                        </p>
-                                        <a href="{{ route('katalog.sumber-data.create') }}" class="btn-primary mt-4">
-                                            Tambah dataset
-                                        </a>
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody class="divide-y divide-line">
+                        @foreach ($sumberData as $sumber)
+                            <tr class="transition hover:bg-rimba-50/70">
+                                <td class="px-5 py-4">
+                                    <a href="{{ route('katalog.sumber-data.show', $sumber) }}" class="font-semibold text-ink-900 hover:text-rimba-600">
+                                        {{ $sumber->nama_sumber }}
+                                    </a>
+                                    <p class="mt-0.5 text-xs text-ink-400">{{ $sumber->nama_penyedia }}</p>
+                                </td>
+                                <td class="px-5 py-4 text-ink-500">{{ $sumber->format_data }}</td>
+                                <td class="px-5 py-4 text-ink-500">
+                                    {{ $sumber->terakhir_diambil_pada?->format('d M Y • H:i') ?? 'Belum pernah' }}
+                                </td>
+                                <td class="px-5 py-4">
+                                    @include('katalog.sumber-data._badges', ['sumber' => $sumber])
+                                </td>
+                                <td class="px-5 py-4 text-right">
+                                    <a href="{{ route('katalog.sumber-data.edit', $sumber) }}" class="text-sm font-semibold text-rimba-600 hover:text-rimba-700">
+                                        Ubah
+                                    </a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
 
         @if ($sumberData->hasPages())
             <div class="border-t border-line px-5 py-4">
