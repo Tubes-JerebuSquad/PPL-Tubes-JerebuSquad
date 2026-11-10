@@ -42,3 +42,5 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [MasyarakatDashboardController::class, 'index'])->name('dashboard');
     });
 });
+
+require __DIR__.'/admin.php';

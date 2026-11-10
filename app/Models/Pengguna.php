@@ -5,6 +5,7 @@ namespace App\Models;
 use Database\Factories\PenggunaFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -20,7 +21,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 #[Hidden(['password_hash'])]
 class Pengguna extends Authenticatable
 {
-    /** @use HasFactory<PenggunaFactory> */
+   
     use HasFactory;
 
     public const CREATED_AT = 'dibuat_pada';
@@ -35,9 +36,7 @@ class Pengguna extends Authenticatable
 
     protected $primaryKey = 'pengguna_id';
 
-    /**
-     * @return array<string, string>
-     */
+   
     protected function casts(): array
     {
         return [
@@ -46,17 +45,13 @@ class Pengguna extends Authenticatable
         ];
     }
 
-    /**
-     * @return BelongsTo<Peran, $this>
-     */
+    
     public function peran(): BelongsTo
     {
         return $this->belongsTo(Peran::class, 'peran_id', 'peran_id');
     }
 
-    /**
-     * Hak akses admin ditentukan oleh nama peran, bukan id yang di-hardcode.
-     */
+    
     public function isAdmin(): bool
     {
         return strcasecmp($this->peran?->nama_peran ?? '', 'Admin') === 0;
@@ -82,17 +77,42 @@ class Pengguna extends Authenticatable
         return $this->status_akun === self::STATUS_AKTIF;
     }
 
-    /**
-     * Laravel membaca password dari kolom password_hash.
-     */
+    
+    public function scopeCari(Builder $query, ?string $kata): void
+    {
+        if (blank($kata)) {
+            return;
+        }
+
+        $query->where(function (Builder $q) use ($kata): void {
+            $q->whereLike('nama_lengkap', "%{$kata}%")
+                ->orWhereLike('email', "%{$kata}%");
+        });
+    }
+
+    
+    public function scopeBerperan(Builder $query, ?int $peranId): void
+    {
+        if ($peranId) {
+            $query->where('peran_id', $peranId);
+        }
+    }
+
+   
+    public function scopeBerstatus(Builder $query, ?string $status): void
+    {
+        if (filled($status)) {
+            $query->where('status_akun', $status);
+        }
+    }
+
+    
     public function getAuthPassword(): string
     {
         return $this->password_hash;
     }
 
-    /**
-     * Tabel pengguna tidak punya kolom remember_token.
-     */
+   
     public function getRememberTokenName(): string
     {
         return '';
