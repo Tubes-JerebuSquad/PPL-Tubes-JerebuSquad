@@ -4,7 +4,46 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'RimbaWatch')</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+        <!-- Tailwind CSS CDN Fallback (saat Vite belum di-build) -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        colors: {
+                            rimba: {
+                                950: '#10291e',
+                                900: '#173e2d',
+                                800: '#1f4a36',
+                                700: '#225a38',
+                                600: '#2f7a50',
+                                500: '#3f8f63',
+                                100: '#e7f2e6',
+                                50: '#f4f7f4',
+                            },
+                            ink: {
+                                900: '#173e2d',
+                                700: '#34463a',
+                                500: '#516457',
+                                400: '#6b776f',
+                            },
+                            line: {
+                                DEFAULT: '#e1e8e2',
+                                strong: '#d8e1d9',
+                            },
+                            danger: {
+                                soft: '#fbe9e7',
+                                ink: '#914b41',
+                            }
+                        }
+                    }
+                }
+            }
+        </script>
+    @endif
 </head>
 <body class="min-h-screen bg-rimba-50 font-sans text-ink-700 antialiased">
     <div class="grid min-h-screen lg:grid-cols-2">
