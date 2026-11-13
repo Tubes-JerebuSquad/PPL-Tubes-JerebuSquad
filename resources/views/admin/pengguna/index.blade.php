@@ -8,9 +8,10 @@
         <div>
             <h1 class="text-xl font-semibold">Pengguna & Akses</h1>
             <p class="text-sm opacity-70">Kelola akun pengguna dan peran mereka.</p>
+         <div class="flex gap-2">
+            <a href="{{ route('admin.audit.index') }}" class="btn-secondary">Riwayat Perubahan</a>
+            <a href="{{ route('admin.pengguna.create') }}" class="btn-primary">Tambah Pengguna</a>
         </div>
-        <a href="{{ route('admin.pengguna.create') }}" class="btn-primary">Tambah Pengguna</a>
-    </div>
 
     <x-ui.card class="mt-4">
         <form method="GET" action="{{ route('admin.pengguna.index') }}" class="grid gap-3 sm:grid-cols-4">
