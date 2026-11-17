@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\AksiRiwayat;
+use App\Enums\StatusKualitas;
 use Database\Factories\RiwayatSumberDataFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -55,5 +56,29 @@ class RiwayatSumberData extends Model
     public function pengguna(): BelongsTo
     {
         return $this->belongsTo(Pengguna::class, 'pengguna_id', 'pengguna_id');
+    }
+
+    /**
+     * Format nilai lama/baru pada riwayat agar boolean dan enum tampil mudah dibaca.
+     */
+    public static function formatNilai(string $field, mixed $nilai): string
+    {
+        if ($nilai === null || $nilai === '') {
+            return '-';
+        }
+
+        if (is_bool($nilai)) {
+            if ($field === 'is_aktif') {
+                return $nilai ? 'Aktif' : 'Nonaktif';
+            }
+
+            return $nilai ? 'Ya' : 'Tidak';
+        }
+
+        if ($field === 'status_kualitas') {
+            return StatusKualitas::tryFrom((string) $nilai)?->label() ?? (string) $nilai;
+        }
+
+        return (string) $nilai;
     }
 }

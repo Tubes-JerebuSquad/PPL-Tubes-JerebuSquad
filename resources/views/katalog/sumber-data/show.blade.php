@@ -128,9 +128,9 @@
                                         @foreach ($riwayat->perubahan as $field => $nilai)
                                             <li>
                                                 <span class="font-medium text-ink-700">{{ \App\Models\SumberData::LABEL_FIELD[$field] ?? $field }}</span>:
-                                                {{ is_array($nilai) ? ($nilai['lama'] ?? '-') : $nilai }}
+                                                {{ \App\Models\RiwayatSumberData::formatNilai($field, is_array($nilai) ? ($nilai['lama'] ?? null) : $nilai) }}
                                                 &rarr;
-                                                {{ is_array($nilai) ? ($nilai['baru'] ?? '-') : $nilai }}
+                                                {{ \App\Models\RiwayatSumberData::formatNilai($field, is_array($nilai) ? ($nilai['baru'] ?? null) : $nilai) }}
                                             </li>
                                         @endforeach
                                     </ul>

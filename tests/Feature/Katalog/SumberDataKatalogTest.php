@@ -95,7 +95,22 @@ class SumberDataKatalogTest extends TestCase
             ->assertSee('Dibuat')
             ->assertSee('Nama sumber')
             ->assertSee('Jenis sumber')
+            ->assertSee('Terverifikasi')
             ->assertDontSee('nama_sumber');
+    }
+
+    public function test_riwayat_aktivasi_menampilkan_status_aktif_nonaktif_bukan_angka(): void
+    {
+        $sumber = SumberData::factory()->nonaktif()->create();
+
+        $this->patch(route('katalog.sumber-data.aktifkan', $sumber))
+            ->assertSessionHasNoErrors();
+
+        $this->get(route('katalog.sumber-data.show', $sumber))
+            ->assertOk()
+            ->assertSee('Status aktif')
+            ->assertSee('Nonaktif')
+            ->assertSee('Aktif');
     }
 
     public function test_halaman_katalog_memakai_layout_global_admin(): void
