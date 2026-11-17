@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Masyarakat\DashboardController as MasyarakatDashboardController;
 use App\Http\Controllers\Pengawas\DashboardController as PengawasDashboardController;
+use App\Http\Controllers\PetaInteraktifController;
 use App\Http\Controllers\Petugas\DashboardController as PetugasDashboardController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,10 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', [DaftarController::class, 'create'])->name('register');
     Route::post('/register', [DaftarController::class, 'store'])->middleware('throttle:5,1');
 });
+
+// Peta Interaktif Multi-Layer (PBI-04 / FR-04) - Terbuka untuk seluruh peran & publik
+Route::get('/peta', [PetaInteraktifController::class, 'index'])->name('peta.index');
+Route::get('/peta-interaktif', [PetaInteraktifController::class, 'index'])->name('peta.interaktif');
 
 // Rute yang membutuhkan autentikasi
 Route::middleware('auth')->group(function () {

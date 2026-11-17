@@ -1,0 +1,155 @@
+/* ==========================================================================
+   RimbaWatch — Peta Interaktif Multi-Layer (PBI-04 / FR-04)
+   Stylesheet Terpisah (peta.css)
+   ========================================================================== */
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #F6F8F6;
+  color: #1A241E;
+  overflow-x: hidden;
+}
+
+/* Custom Lime-Green Checkbox matching mockup */
+.rw-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1.5px solid #B7C7B3;
+  background-color: #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.rw-checkbox:checked {
+  background-color: #C6E689;
+  border-color: #4F7942;
+}
+
+.rw-checkbox:checked::after {
+  content: '';
+  width: 10px;
+  height: 6px;
+  border-left: 2.2px solid #133120;
+  border-bottom: 2.2px solid #133120;
+  transform: rotate(-45deg) translate(1px, -1px);
+}
+
+/* Sidebar custom subtle scrollbar */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(198, 230, 137, 0.25);
+  border-radius: 9999px;
+}
+
+/* Leaflet Map Container */
+#map {
+  width: 100%;
+  height: 100%;
+  min-height: 460px;
+  z-index: 1;
+  background-color: #EEF2EB;
+}
+
+/* Clean minimalist filter for OSM Minimalis mode */
+.osm-minimal-tiles {
+  filter: grayscale(65%) brightness(1.06) contrast(0.94);
+}
+
+.leaflet-control-attribution {
+  font-size: 10px !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-top-left-radius: 8px;
+  padding: 2px 8px !important;
+  color: #5A6B60 !important;
+}
+
+/* Circular Map Pins with crisp 2.5px white outer border & drop shadow */
+.rw-pin {
+  border-radius: 9999px;
+  border: 2.5px solid #FFFFFF;
+  box-shadow: 0 2px 6px rgba(19, 49, 32, 0.34);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.rw-pin:hover,
+.rw-pin.selected {
+  transform: scale(1.28);
+  box-shadow: 0 0 0 4px rgba(198, 230, 137, 0.92), 0 4px 10px rgba(0, 0, 0, 0.28);
+  z-index: 950 !important;
+}
+
+/* Stale Hotspot (>24h freshness threshold) Amber Ring & Badge */
+@keyframes pulseAmber {
+  0% { box-shadow: 0 0 0 0 rgba(224, 122, 34, 0.72); }
+  70% { box-shadow: 0 0 0 8px rgba(224, 122, 34, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(224, 122, 34, 0); }
+}
+
+.rw-pin-stale {
+  outline: 2px solid #F59E0B;
+  outline-offset: 1px;
+  animation: pulseAmber 2.1s infinite;
+}
+
+.rw-pin-stale::after {
+  content: 'U';
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  width: 13px;
+  height: 13px;
+  border-radius: 9999px;
+  background: #FEF3C7;
+  color: #92400E;
+  border: 1.5px solid #E07A22;
+  font-size: 8px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* Custom MarkerCluster Styling */
+.marker-cluster-small,
+.marker-cluster-medium,
+.marker-cluster-large {
+  background-color: rgba(198, 230, 137, 0.58) !important;
+}
+
+.marker-cluster-small div,
+.marker-cluster-medium div,
+.marker-cluster-large div {
+  background-color: #133120 !important;
+  color: #C6E689 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  border: 1.5px solid #FFFFFF;
+}
+
+/* User Device Geolocate Pulse */
+.user-loc-pulse {
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: #2563EB;
+  border: 2.5px solid #FFFFFF;
+  box-shadow: 0 0 0 7px rgba(37, 99, 235, 0.25);
+}
