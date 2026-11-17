@@ -23,13 +23,17 @@
                 Sistem demo
             </span>
 
+            @php
+                $authUser = auth()->user();
+                $inisialAuth = $authUser ? strtoupper(substr($authUser->nama_lengkap, 0, 2)) : null;
+            @endphp
             <div class="flex items-center gap-2.5">
                 <span class="flex h-9 w-9 items-center justify-center rounded-full bg-rimba-900 text-xs font-bold text-white">
-                    @yield('pengguna_inisial', 'RM')
+                    @yield('pengguna_inisial', $inisialAuth ?? 'RM')
                 </span>
                 <span class="hidden leading-tight sm:block">
-                    <span class="block text-xs font-semibold text-ink-900">@yield('pengguna_nama', 'Admin RimbaWatch')</span>
-                    <span class="block text-[11px] text-ink-400">@yield('pengguna_peran', 'Admin')</span>
+                    <span class="block text-xs font-semibold text-ink-900">@yield('pengguna_nama', $authUser?->nama_lengkap ?? 'Admin RimbaWatch')</span>
+                    <span class="block text-[11px] text-ink-400">@yield('pengguna_peran', $authUser?->peran?->nama_peran ?? 'Admin')</span>
                 </span>
             </div>
         </div>

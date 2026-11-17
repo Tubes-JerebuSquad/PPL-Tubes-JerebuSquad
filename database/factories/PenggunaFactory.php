@@ -35,6 +35,20 @@ class PenggunaFactory extends Factory
         ]);
     }
 
+    public function pengawas(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'peran_id' => Peran::factory()->pengawas(),
+        ]);
+    }
+
+    public function petugasLapangan(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'peran_id' => Peran::factory()->petugasLapangan(),
+        ]);
+    }
+
     public function masyarakat(): static
     {
         return $this->state(fn (array $attributes) => [
