@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use Database\Factories\BerkasMediaFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -17,6 +19,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class BerkasMedia extends Model
 {
+    /** @use HasFactory<BerkasMediaFactory> */
+    use HasFactory;
+
     public const CREATED_AT = 'dibuat_pada';
 
     public const UPDATED_AT = null;
@@ -26,6 +31,24 @@ class BerkasMedia extends Model
     protected $table = 'berkas_media';
 
     protected $primaryKey = 'berkas_media_id';
+
+    /**
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'tingkat_akses' => self::AKSES_PRIVAT,
+    ];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'ukuran_file_byte' => 'integer',
+            'dibuat_pada' => 'datetime',
+        ];
+    }
 
     public function isFoto(): bool
     {

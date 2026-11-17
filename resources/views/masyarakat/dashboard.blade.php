@@ -21,15 +21,15 @@
                 </p>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex shrink-0 flex-wrap items-center gap-2">
                 <!-- Tombol Buat Laporan Cepat -->
                 <a 
-                    href="{{ route('masyarakat.laporan.create') }}"
-                    class="btn-primary inline-flex items-center gap-2 text-xs">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    href="{{ route('masyarakat.laporan.create') }}" 
+                    class="btn-primary inline-flex shrink-0 items-center gap-2 whitespace-nowrap text-xs">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    <span>+ Buat Laporan Baru</span>
+                    <span>Buat Laporan Baru</span>
                 </a>
 
                 <!-- Tombol Logout Cepat -->
@@ -117,9 +117,12 @@
 
         <!-- Tabel Riwayat Aduan Saya -->
         <div class="rounded-2xl border border-line bg-white p-6 shadow-sm lg:col-span-2">
-            <h2 class="text-base font-bold text-ink-900 mb-4 flex items-center justify-between">
+            <h2 class="text-base font-bold text-ink-900 mb-4 flex items-center justify-between gap-2">
                 <span>Riwayat Laporan Aduan Saya</span>
-                <span class="text-xs font-semibold text-ink-400">Total: {{ count($riwayatLaporan) }} riwayat</span>
+                <span class="flex items-center gap-3 text-xs font-semibold">
+                    <span class="text-ink-400">Total: {{ count($riwayatLaporan) }} riwayat</span>
+                    <a href="{{ route('masyarakat.laporan.index') }}" class="text-rimba-600 hover:text-rimba-700 hover:underline">Lihat semua</a>
+                </span>
             </h2>
 
             @if (count($riwayatLaporan) > 0)
@@ -135,13 +138,30 @@
                         </thead>
                         <tbody class="divide-y divide-line">
                             @foreach ($riwayatLaporan as $item)
+                                @php
+                                    $statusEnum = \App\Enums\StatusLaporan::dariNilai($item->status_laporan ?? null);
+                                    $kategoriEnum = \App\Enums\KategoriLaporan::dariNilai($item->kategori ?? null);
+                                @endphp
                                 <tr class="hover:bg-rimba-50/40">
-                                    <td class="py-3 px-3 font-mono text-xs text-ink-500">#{{ $item->nomor_laporan ?? $item->id }}</td>
-                                    <td class="py-3 px-3 font-medium text-ink-900">{{ $item->kategori ?? 'Laporan Lingkungan' }}</td>
+                                    <td class="py-3 px-3 font-mono text-xs">
+                                        <a href="{{ route('masyarakat.laporan.show', $item->laporan_id) }}" class="font-semibold text-rimba-600 hover:underline">
+                                            #{{ $item->kode_laporan ?? $item->laporan_id }}
+                                        </a>
+                                    </td>
+                                    <td class="py-3 px-3 font-medium text-ink-900">
+                                        {{ $kategoriEnum?->label() ?? ucwords(str_replace('_', ' ', (string) ($item->kategori ?? 'Laporan Lingkungan'))) }}
+                                    </td>
                                     <td class="py-3 px-3">
-                                        <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold bg-rimba-100 text-rimba-700">
-                                            {{ strtoupper($item->status_laporan ?? 'TERKIRIM') }}
-                                        </span>
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <x-ui.badge :variant="$statusEnum?->variant() ?? 'neutral'">
+                                                {{ $statusEnum?->label() ?? ucwords(strtolower(str_replace('_', ' ', (string) ($item->status_laporan ?? 'TERKIRIM')))) }}
+                                            </x-ui.badge>
+                                            @if ($statusEnum?->bolehDieditPelapor())
+                                                <a href="{{ route('masyarakat.laporan.edit', $item->laporan_id) }}" class="text-xs font-semibold text-amber-ink hover:underline">
+                                                    Perbaiki
+                                                </a>
+                                            @endif
+                                        </div>
                                     </td>
                                     <td class="py-3 px-3 text-xs text-ink-400">{{ $item->dibuat_pada ?? '-' }}</td>
                                 </tr>

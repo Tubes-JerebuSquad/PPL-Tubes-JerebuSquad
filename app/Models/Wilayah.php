@@ -2,8 +2,12 @@
 
 namespace App\Models;
 
+use Database\Factories\WilayahFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
@@ -15,6 +19,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class Wilayah extends Model
 {
+    /** @use HasFactory<WilayahFactory> */
+    use HasFactory;
+
     public const CREATED_AT = 'dibuat_pada';
 
     public const UPDATED_AT = 'diperbarui_pada';
@@ -23,6 +30,9 @@ class Wilayah extends Model
 
     protected $primaryKey = 'wilayah_id';
 
+    /**
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [
@@ -32,8 +42,24 @@ class Wilayah extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Wilayah, $this>
+     */
+    public function induk(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'wilayah_induk_id', 'wilayah_id');
+    }
+
+    /**
+     * @return HasMany<Kawasan, $this>
+     */
     public function kawasan(): HasMany
     {
         return $this->hasMany(Kawasan::class, 'wilayah_id', 'wilayah_id');
+    }
+
+    public function scopeAktif(Builder $query): Builder
+    {
+        return $query->where('is_aktif', true);
     }
 }

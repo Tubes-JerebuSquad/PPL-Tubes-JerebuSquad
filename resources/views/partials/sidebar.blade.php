@@ -100,14 +100,14 @@
             ],
             [
                 'label' => 'Laporan Saya',
-                'route' => null,
-                'pola' => null,
+                'route' => 'masyarakat.laporan.index',
+                'pola' => 'masyarakat.laporan.*',
                 'ikon' => 'database',
             ],
             [
                 'label' => 'Buat Pengaduan',
-                'route' => null,
-                'pola' => null,
+                'route' => 'masyarakat.laporan.create',
+                'pola' => 'masyarakat.laporan.create',
                 'ikon' => 'map',
             ],
             [
