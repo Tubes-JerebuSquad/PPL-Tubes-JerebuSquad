@@ -40,5 +40,7 @@ Route::middleware('auth')->group(function () {
     // Dashboard Peran Masyarakat / Warga
     Route::prefix('masyarakat')->name('masyarakat.')->group(function () {
         Route::get('/dashboard', [MasyarakatDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/laporan/buat', [\App\Http\Controllers\Masyarakat\LaporanController::class, 'create'])->name('laporan.create');
+        Route::post('/laporan', [\App\Http\Controllers\Masyarakat\LaporanController::class, 'store'])->name('laporan.store');
     });
 });
