@@ -227,7 +227,7 @@
 
           <div class="pt-1">
             <a 
-              href="{{ url('/lapor') }}" 
+              href="{{ route('masyarakat.laporan.create') }}"
               class="w-full text-xs text-rimba-leaf hover:text-rimba-dark font-medium py-2 px-3 rounded-lg bg-rimba-mint/40 hover:bg-rimba-mint transition-colors border border-rimba-sage/20 flex items-center justify-center gap-1.5">
               <span>Mau lapor temuan di hutan tanpa akun?</span>
               <strong class="font-semibold underline">Mode Tamu &rarr;</strong>

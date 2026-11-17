@@ -24,7 +24,7 @@
             <div class="flex items-center gap-2">
                 <!-- Tombol Buat Laporan Cepat -->
                 <a 
-                    href="{{ url('/lapor') }}" 
+                    href="{{ route('masyarakat.laporan.create') }}"
                     class="btn-primary inline-flex items-center gap-2 text-xs">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -140,10 +140,10 @@
                                     <td class="py-3 px-3 font-medium text-ink-900">{{ $item->kategori ?? 'Laporan Lingkungan' }}</td>
                                     <td class="py-3 px-3">
                                         <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold bg-rimba-100 text-rimba-700">
-                                            {{ strtoupper($item->status ?? 'TERKIRIM') }}
+                                            {{ strtoupper($item->status_laporan ?? 'TERKIRIM') }}
                                         </span>
                                     </td>
-                                    <td class="py-3 px-3 text-xs text-ink-400">{{ $item->created_at ?? '-' }}</td>
+                                    <td class="py-3 px-3 text-xs text-ink-400">{{ $item->dibuat_pada ?? '-' }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

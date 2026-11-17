@@ -25,7 +25,7 @@ class DashboardController extends Controller
         
         $laporanPerluVerifikasi = Schema::hasTable('laporan') 
             ? DB::table('laporan')
-                ->whereIn('status', ['menunggu_verifikasi', 'MENUNGGU_VERIFIKASI'])
+                ->whereIn('status_laporan', ['menunggu_verifikasi', 'MENUNGGU_VERIFIKASI'])
                 ->count() 
             : 0;
 
@@ -34,7 +34,7 @@ class DashboardController extends Controller
 
         $laporanTerbaru = Schema::hasTable('laporan')
             ? DB::table('laporan')
-                ->orderByDesc('created_at')
+                ->orderByDesc('dibuat_pada')
                 ->take(5)
                 ->get()
             : collect();
