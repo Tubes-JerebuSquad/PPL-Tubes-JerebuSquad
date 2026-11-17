@@ -235,7 +235,7 @@ class UbahKawasanTest extends TestCase
             'format_data' => 'GeoJSON',
             'kode_crs' => 'EPSG:4326',
             'status_kualitas' => 'TERVERIFIKASI',
-        ]);
+        ], 'sumber_id');
     }
 
     /**

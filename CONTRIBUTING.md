@@ -63,6 +63,18 @@ Menghentikan: `Ctrl+C`, atau `docker compose down`.
   docker compose exec app php artisan <perintah>
   ```
 
+### Menjalankan pengujian
+
+Pengujian memakai PostgreSQL, bukan SQLite, karena skema memakai tipe khusus PostgreSQL seperti `jsonb` dan nantinya PostGIS.
+
+```bash
+docker compose exec app php artisan test
+```
+
+- Database uji `rimbawatch_test` dibuat otomatis saat container `app` dijalankan.
+- `phpunit.xml` memaksa koneksi ke database uji, sehingga isi database pengembangan tidak tersentuh walaupun `DB_DATABASE` di-override dari terminal.
+- Karena memakai PostgreSQL, jalankan pengujian lewat Docker. Dari host, nama host `db` tidak bisa di-resolve.
+
 ## 5. Keamanan
 
 - Jangan commit `.env`, password, token, atau kredensial apa pun. Gunakan `.env.example` untuk contoh nilai non-rahasia.

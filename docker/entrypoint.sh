@@ -5,5 +5,6 @@ set -e
 composer install --no-interaction --prefer-dist
 grep -q '^APP_KEY=.\+' .env || php artisan key:generate --force
 php artisan migrate --force
+php docker/buat-database-uji.php
 
 exec php artisan serve --host=0.0.0.0 --port=8000
