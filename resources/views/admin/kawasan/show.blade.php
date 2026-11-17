@@ -13,13 +13,16 @@
                 @if ($kawasan->is_aktif)
                     <x-ui.badge variant="success">Aktif</x-ui.badge>
                 @else
-                    <x-ui.badge variant="neutral">Nonaktif</x-ui.badge>
+                    <x-ui.badge variant="danger">Nonaktif</x-ui.badge>
                 @endif
             </div>
             <p class="mt-1 text-sm opacity-70">Detail data kawasan RimbaWatch.</p>
         </div>
 
-        <a href="{{ route('admin.kawasan.index') }}" class="btn-secondary">Kembali ke daftar</a>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ route('admin.kawasan.edit', $kawasan) }}" class="btn-primary">Edit</a>
+            <a href="{{ route('admin.kawasan.index') }}" class="btn-secondary">Kembali ke daftar</a>
+        </div>
     </div>
 
     <div class="mt-4 grid gap-4 lg:grid-cols-3">
@@ -45,7 +48,7 @@
                 </div>
 
                 <div>
-                    <dt class="text-xs font-medium text-ink-400">Status kawasan</dt>
+                    <dt class="text-xs font-medium text-ink-400">Status Kawasan</dt>
                     <dd class="mt-1 text-sm text-ink-900">{{ $kawasan->status_kawasan }}</dd>
                 </div>
 
@@ -57,12 +60,12 @@
                 </div>
 
                 <div>
-                    <dt class="text-xs font-medium text-ink-400">Status aktif</dt>
+                    <dt class="text-xs font-medium text-ink-400">Status Data</dt>
                     <dd class="mt-1">
                         @if ($kawasan->is_aktif)
                             <x-ui.badge variant="success">Aktif</x-ui.badge>
                         @else
-                            <x-ui.badge variant="neutral">Nonaktif</x-ui.badge>
+                            <x-ui.badge variant="danger">Nonaktif</x-ui.badge>
                         @endif
                     </dd>
                 </div>

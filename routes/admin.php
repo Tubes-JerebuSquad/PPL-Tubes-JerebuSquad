@@ -13,5 +13,5 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::patch('pengguna/{pengguna}/aktifkan', [PenggunaController::class, 'aktifkan'])
         ->name('pengguna.aktifkan');
 
-    Route::resource('kawasan', KawasanController::class)->only(['index', 'show']);
+    Route::resource('kawasan', KawasanController::class)->only(['index', 'show', 'create', 'store', 'edit', 'update']);
 });

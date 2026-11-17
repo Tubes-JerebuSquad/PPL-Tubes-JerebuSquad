@@ -4,9 +4,13 @@
 @section('breadcrumb', 'Admin / Data Kawasan')
 
 @section('content')
-    <div>
-        <h1 class="text-xl font-semibold">Data Kawasan</h1>
-        <p class="text-sm opacity-70">Daftar kawasan yang terdaftar di RimbaWatch.</p>
+    <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+            <h1 class="text-xl font-semibold">Data Kawasan</h1>
+            <p class="text-sm opacity-70">Daftar kawasan yang terdaftar di RimbaWatch.</p>
+        </div>
+
+        <a href="{{ route('admin.kawasan.create') }}" class="btn-primary">Tambah Kawasan</a>
     </div>
 
     <x-ui.card class="mt-4 overflow-hidden">
@@ -22,7 +26,7 @@
                         <col class="w-[17%]">
                         <col class="w-[13%]">
                         <col class="w-[9%]">
-                        <col class="w-28">
+                        <col class="w-44">
                     </colgroup>
                     <thead class="bg-rimba-50">
                         <tr class="border-b border-line">
@@ -36,10 +40,10 @@
                                 Jenis
                             </th>
                             <th scope="col" class="px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-ink-400">
-                                Status
+                                Status Kawasan
                             </th>
                             <th scope="col" class="px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-ink-400">
-                                Aktif
+                                Status Data
                             </th>
                             <th scope="col" class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.08em] text-ink-400">
                                 Aksi
@@ -68,15 +72,22 @@
                                     @if ($kawasan->is_aktif)
                                         <x-ui.badge variant="success">Aktif</x-ui.badge>
                                     @else
-                                        <x-ui.badge variant="neutral">Nonaktif</x-ui.badge>
+                                        <x-ui.badge variant="danger">Nonaktif</x-ui.badge>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-right align-middle">
-                                    <a href="{{ route('admin.kawasan.show', $kawasan) }}"
-                                       class="btn-secondary whitespace-nowrap"
-                                       aria-label="Lihat detail {{ $kawasan->nama_kawasan }}">
-                                        Detail
-                                    </a>
+                                    <div class="flex justify-end gap-2">
+                                        <a href="{{ route('admin.kawasan.edit', $kawasan) }}"
+                                           class="btn-secondary whitespace-nowrap"
+                                           aria-label="Ubah {{ $kawasan->nama_kawasan }}">
+                                            Edit
+                                        </a>
+                                        <a href="{{ route('admin.kawasan.show', $kawasan) }}"
+                                           class="btn-secondary whitespace-nowrap"
+                                           aria-label="Lihat detail {{ $kawasan->nama_kawasan }}">
+                                            Detail
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
