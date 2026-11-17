@@ -100,7 +100,7 @@
                                 <p class="mt-0.5 text-xs text-ink-400">{{ $laporan->wilayah?->nama_wilayah ?? '-' }}</p>
                             </div>
 
-                            <x-ui.badge :variant="$laporan->varianStatus()">
+                            <x-ui.badge :variant="$laporan->varianStatus()" class="shrink-0 whitespace-nowrap">
                                 {{ $laporan->labelStatus() }}
                             </x-ui.badge>
                         </div>

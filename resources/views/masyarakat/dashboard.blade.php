@@ -21,15 +21,15 @@
                 </p>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex shrink-0 flex-wrap items-center gap-2">
                 <!-- Tombol Buat Laporan Cepat -->
                 <a 
                     href="{{ url('/lapor') }}" 
-                    class="btn-primary inline-flex items-center gap-2 text-xs">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="btn-primary inline-flex shrink-0 items-center gap-2 whitespace-nowrap text-xs">
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    <span>+ Buat Laporan Baru</span>
+                    <span>Buat Laporan Baru</span>
                 </a>
 
                 <!-- Tombol Logout Cepat -->
