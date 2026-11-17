@@ -12,10 +12,16 @@
                 'ikon' => 'grid',
             ],
             [
+                'label' => 'Peta Interaktif',
+                'route' => 'peta.index',
+                'pola' => 'peta.*',
+                'ikon' => 'map',
+            ],
+            [
                 'label' => 'Data Kawasan',
                 'route' => 'admin.kawasan.index',
                 'pola' => 'admin.kawasan.*',
-                'ikon' => 'map',
+                'ikon' => 'database',
             ],
             [
                 'label' => 'Sumber Data',
@@ -45,6 +51,12 @@
                 'ikon' => 'grid',
             ],
             [
+                'label' => 'Peta Interaktif',
+                'route' => 'peta.index',
+                'pola' => 'peta.*',
+                'ikon' => 'map',
+            ],
+            [
                 'label' => 'Verifikasi Laporan',
                 'route' => null,
                 'pola' => null,
@@ -72,6 +84,12 @@
                 'ikon' => 'grid',
             ],
             [
+                'label' => 'Peta Interaktif',
+                'route' => 'peta.index',
+                'pola' => 'peta.*',
+                'ikon' => 'map',
+            ],
+            [
                 'label' => 'Surat Tugas Inspeksi',
                 'route' => null,
                 'pola' => null,
@@ -97,6 +115,12 @@
                 'route' => 'masyarakat.dashboard',
                 'pola' => 'masyarakat.dashboard*',
                 'ikon' => 'grid',
+            ],
+            [
+                'label' => 'Peta Interaktif',
+                'route' => 'peta.index',
+                'pola' => 'peta.*',
+                'ikon' => 'map',
             ],
             [
                 'label' => 'Laporan Saya',
