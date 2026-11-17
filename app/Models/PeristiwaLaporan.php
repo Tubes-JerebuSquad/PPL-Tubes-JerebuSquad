@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\StatusLaporan;
+use Database\Factories\PeristiwaLaporanFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -17,6 +20,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class PeristiwaLaporan extends Model
 {
+    /** @use HasFactory<PeristiwaLaporanFactory> */
+    use HasFactory;
+
     protected $table = 'peristiwa_laporan';
 
     protected $primaryKey = 'peristiwa_id';
@@ -48,5 +54,39 @@ class PeristiwaLaporan extends Model
     public function aktor(): BelongsTo
     {
         return $this->belongsTo(Pengguna::class, 'aktor_id', 'pengguna_id');
+    }
+
+    public function labelJenis(): string
+    {
+        return match (strtoupper((string) $this->jenis_peristiwa)) {
+            'DIAJUKAN' => 'Laporan Diajukan',
+            'PERMINTAAN_PERBAIKAN', 'DIKEMBALIKAN' => 'Dikembalikan untuk Perbaikan',
+            'PERBAIKAN_DIKIRIM' => 'Perbaikan Dikirim Ulang',
+            'DIVERIFIKASI', 'DITERIMA' => 'Laporan Diverifikasi',
+            'DITOLAK' => 'Laporan Ditolak',
+            'INSPEKSI_DITUGASKAN', 'DALAM_INSPEKSI' => 'Diteruskan ke Inspeksi',
+            'SELESAI' => 'Penanganan Selesai',
+            default => ucwords(strtolower(str_replace('_', ' ', (string) $this->jenis_peristiwa))),
+        };
+    }
+
+    public function labelStatusLama(): ?string
+    {
+        if ($this->status_lama === null) {
+            return null;
+        }
+
+        return StatusLaporan::dariNilai($this->status_lama)?->label()
+            ?? ucwords(strtolower(str_replace('_', ' ', $this->status_lama)));
+    }
+
+    public function labelStatusBaru(): ?string
+    {
+        if ($this->status_baru === null) {
+            return null;
+        }
+
+        return StatusLaporan::dariNilai($this->status_baru)?->label()
+            ?? ucwords(strtolower(str_replace('_', ' ', $this->status_baru)));
     }
 }
