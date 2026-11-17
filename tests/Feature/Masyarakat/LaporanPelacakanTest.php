@@ -35,45 +35,45 @@ class LaporanPelacakanTest extends TestCase
     {
         Laporan::factory()->create([
             'pelapor_id' => $this->pelapor->pengguna_id,
-            'nomor_laporan' => 'RW-SAYA-001',
+            'kode_laporan' => 'LAP-SAYA-001',
         ]);
         Laporan::factory()->create([
             'pelapor_id' => $this->pelaporLain->pengguna_id,
-            'nomor_laporan' => 'RW-ORANG-999',
+            'kode_laporan' => 'LAP-ORANG-999',
         ]);
 
         $this->actingAs($this->pelapor)
             ->get(route('masyarakat.laporan.index'))
             ->assertOk()
-            ->assertSee('RW-SAYA-001')
-            ->assertDontSee('RW-ORANG-999')
+            ->assertSee('LAP-SAYA-001')
+            ->assertDontSee('LAP-ORANG-999')
             ->assertSee('PBI-09 · Masyarakat');
     }
 
     public function test_pencarian_dan_filter_status_menyaring_laporan_milik_sendiri(): void
     {
-        Laporan::factory()->perluPerbaikan()->create([
+        Laporan::factory()->dikembalikan()->create([
             'pelapor_id' => $this->pelapor->pengguna_id,
-            'nomor_laporan' => 'RW-2026-001',
+            'kode_laporan' => 'LAP-2026-001',
             'deskripsi' => 'Pembukaan lahan gambut tanpa izin.',
         ]);
         Laporan::factory()->status(StatusLaporan::DIVERIFIKASI)->create([
             'pelapor_id' => $this->pelapor->pengguna_id,
-            'nomor_laporan' => 'RW-2026-002',
+            'kode_laporan' => 'LAP-2026-002',
             'deskripsi' => 'Titik asap dekat sungai.',
         ]);
 
         $this->actingAs($this->pelapor)
-            ->get(route('masyarakat.laporan.index', ['status' => StatusLaporan::PERLU_PERBAIKAN->value]))
+            ->get(route('masyarakat.laporan.index', ['status' => StatusLaporan::DIKEMBALIKAN->value]))
             ->assertOk()
-            ->assertSee('RW-2026-001')
-            ->assertDontSee('RW-2026-002');
+            ->assertSee('LAP-2026-001')
+            ->assertDontSee('LAP-2026-002');
 
         $this->actingAs($this->pelapor)
             ->get(route('masyarakat.laporan.index', ['cari' => 'gambut']))
             ->assertOk()
-            ->assertSee('RW-2026-001')
-            ->assertDontSee('RW-2026-002');
+            ->assertSee('LAP-2026-001')
+            ->assertDontSee('LAP-2026-002');
     }
 
     public function test_empty_state_ditampilkan_saat_belum_ada_laporan_atau_filter_kosong(): void
@@ -85,7 +85,7 @@ class LaporanPelacakanTest extends TestCase
 
         Laporan::factory()->create([
             'pelapor_id' => $this->pelapor->pengguna_id,
-            'nomor_laporan' => 'RW-ADA-001',
+            'kode_laporan' => 'LAP-ADA-001',
         ]);
 
         $this->actingAs($this->pelapor)
@@ -97,40 +97,41 @@ class LaporanPelacakanTest extends TestCase
 
     public function test_detail_menampilkan_status_waktu_perubahan_dan_riwayat_revisi(): void
     {
-        $laporan = Laporan::factory()->perluPerbaikan()->create([
+        $laporan = Laporan::factory()->dikembalikan()->create([
             'pelapor_id' => $this->pelapor->pengguna_id,
-            'nomor_laporan' => 'RW-DETAIL-01',
+            'kode_laporan' => 'LAP-DETAIL-01',
             'deskripsi' => 'Indikasi penebangan liar di lereng timur.',
         ]);
 
         RevisiLaporan::factory()->create([
-            'laporan_id' => $laporan->id,
+            'laporan_id' => $laporan->laporan_id,
             'nomor_revisi' => 1,
+            'diedit_oleh' => $this->pelapor->pengguna_id,
             'deskripsi' => 'Indikasi penebangan liar di lereng timur.',
         ]);
 
         PeristiwaLaporan::factory()->create([
-            'laporan_id' => $laporan->id,
+            'laporan_id' => $laporan->laporan_id,
             'jenis_peristiwa' => 'DIAJUKAN',
             'status_lama' => null,
             'status_baru' => StatusLaporan::MENUNGGU_VERIFIKASI->value,
-            'waktu_peristiwa' => '2026-11-10 08:30:00',
+            'terjadi_pada' => '2026-11-10 08:30:00',
         ]);
 
         PeristiwaLaporan::factory()->create([
-            'laporan_id' => $laporan->id,
-            'jenis_peristiwa' => 'PERMINTAAN_PERBAIKAN',
+            'laporan_id' => $laporan->laporan_id,
+            'jenis_peristiwa' => 'DIKEMBALIKAN',
             'status_lama' => StatusLaporan::MENUNGGU_VERIFIKASI->value,
-            'status_baru' => StatusLaporan::PERLU_PERBAIKAN->value,
-            'catatan_publik' => 'Mohon lampirkan foto area terdampak lebih jelas.',
-            'waktu_peristiwa' => '2026-11-11 14:15:00',
+            'status_baru' => StatusLaporan::DIKEMBALIKAN->value,
+            'catatan_peristiwa' => 'Mohon lampirkan foto area terdampak lebih jelas.',
+            'terjadi_pada' => '2026-11-11 14:15:00',
         ]);
 
         $this->actingAs($this->pelapor)
             ->get(route('masyarakat.laporan.show', $laporan))
             ->assertOk()
-            ->assertSee('RW-DETAIL-01')
-            ->assertSee('Perlu Perbaikan')
+            ->assertSee('LAP-DETAIL-01')
+            ->assertSee('Dikembalikan (Perlu Perbaikan)')
             ->assertSee('Mohon lampirkan foto area terdampak lebih jelas.')
             ->assertSee('10 Nov 2026 • 08:30')
             ->assertSee('11 Nov 2026 • 14:15')
@@ -142,7 +143,7 @@ class LaporanPelacakanTest extends TestCase
     {
         $laporan = Laporan::factory()->status(StatusLaporan::MENUNGGU_VERIFIKASI)->create([
             'pelapor_id' => $this->pelapor->pengguna_id,
-            'nomor_laporan' => 'RW-KUNCI-01',
+            'kode_laporan' => 'LAP-KUNCI-01',
         ]);
 
         $this->actingAs($this->pelapor)
@@ -154,9 +155,9 @@ class LaporanPelacakanTest extends TestCase
 
     public function test_dashboard_masyarakat_menampilkan_tautan_ke_pelacakan_dan_perbaikan_laporan(): void
     {
-        $laporan = Laporan::factory()->perluPerbaikan()->create([
+        $laporan = Laporan::factory()->dikembalikan()->create([
             'pelapor_id' => $this->pelapor->pengguna_id,
-            'nomor_laporan' => 'RW-DASH-01',
+            'kode_laporan' => 'LAP-DASH-01',
         ]);
 
         $this->actingAs($this->pelapor)
@@ -165,7 +166,7 @@ class LaporanPelacakanTest extends TestCase
             ->assertSee(route('masyarakat.laporan.index'), false)
             ->assertSee(route('masyarakat.laporan.show', $laporan), false)
             ->assertSee(route('masyarakat.laporan.edit', $laporan), false)
-            ->assertSee('RW-DASH-01')
-            ->assertSee('Perlu Perbaikan');
+            ->assertSee('LAP-DASH-01')
+            ->assertSee('Dikembalikan (Perlu Perbaikan)');
     }
 }

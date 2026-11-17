@@ -21,10 +21,10 @@ enum KategoriLaporan: string
     public function label(): string
     {
         return match ($this) {
-            self::DEFORESTASI => 'Indikasi Deforestasi',
-            self::KEBAKARAN => 'Indikasi Kebakaran Hutan/Lahan',
-            self::ALIH_FUNGSI_LAHAN => 'Alih Fungsi Lahan',
-            self::KERUSAKAN_KAWASAN => 'Kerusakan Kawasan',
+            self::DEFORESTASI => 'Deforestasi / penebangan liar',
+            self::KEBAKARAN => 'Kebakaran hutan dan lahan',
+            self::ALIH_FUNGSI_LAHAN => 'Alih fungsi lahan',
+            self::KERUSAKAN_KAWASAN => 'Kerusakan kawasan',
         };
     }
 

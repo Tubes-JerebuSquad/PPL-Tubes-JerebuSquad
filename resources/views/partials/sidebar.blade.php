@@ -106,8 +106,8 @@
             ],
             [
                 'label' => 'Buat Pengaduan',
-                'route' => null,
-                'pola' => null,
+                'route' => 'masyarakat.laporan.create',
+                'pola' => 'masyarakat.laporan.create',
                 'ikon' => 'map',
             ],
             [

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\StatusLaporan;
 use App\Models\Laporan;
 use App\Models\PeristiwaLaporan;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -20,13 +21,12 @@ class PeristiwaLaporanFactory extends Factory
     {
         return [
             'laporan_id' => Laporan::factory(),
-            'pengguna_id' => null,
+            'aktor_id' => null,
             'jenis_peristiwa' => 'DIAJUKAN',
             'status_lama' => null,
-            'status_baru' => 'menunggu_verifikasi',
-            'deskripsi' => 'Laporan awal dikirim oleh pelapor.',
-            'catatan_publik' => null,
-            'waktu_peristiwa' => now(),
+            'status_baru' => StatusLaporan::MENUNGGU_VERIFIKASI->value,
+            'catatan_peristiwa' => 'Laporan awal dikirim oleh pelapor.',
+            'terjadi_pada' => now(),
         ];
     }
 }

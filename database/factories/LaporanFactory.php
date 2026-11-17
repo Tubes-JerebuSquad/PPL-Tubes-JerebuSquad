@@ -7,6 +7,7 @@ use App\Enums\StatusLaporan;
 use App\Models\Laporan;
 use App\Models\Pengguna;
 use App\Models\Wilayah;
+use App\Support\LokasiSpasial;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -22,30 +23,38 @@ class LaporanFactory extends Factory
     public function definition(): array
     {
         return [
-            'nomor_laporan' => 'RW-'.now()->format('Ymd').'-'.fake()->unique()->numerify('####'),
+            'kode_laporan' => 'LAP-'.now()->format('Ymd').'-'.strtoupper(fake()->unique()->bothify('??????')),
             'pelapor_id' => Pengguna::factory()->masyarakat(),
             'wilayah_id' => Wilayah::factory(),
             'kawasan_id' => null,
             'kategori' => KategoriLaporan::DEFORESTASI->value,
             'deskripsi' => fake()->paragraph(),
-            'latitude' => fake()->latitude(-6.0, 2.0),
-            'longitude' => fake()->longitude(98.0, 117.0),
-            'waktu_kejadian' => now()->subDays(2),
-            'status' => StatusLaporan::MENUNGGU_VERIFIKASI->value,
+            'lokasi' => LokasiSpasial::ekspresiTitik(
+                fake()->latitude(-6.0, 2.0),
+                fake()->longitude(98.0, 117.0),
+            ),
+            'insiden_pada' => now()->subDays(2),
+            'status_laporan' => StatusLaporan::MENUNGGU_VERIFIKASI->value,
+            'diserahkan_pada' => now()->subDays(2),
         ];
+    }
+
+    public function dikembalikan(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status_laporan' => StatusLaporan::DIKEMBALIKAN->value,
+        ]);
     }
 
     public function perluPerbaikan(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'status' => StatusLaporan::PERLU_PERBAIKAN->value,
-        ]);
+        return $this->dikembalikan();
     }
 
     public function status(StatusLaporan|string $status): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => $status instanceof StatusLaporan ? $status->value : $status,
+            'status_laporan' => $status instanceof StatusLaporan ? $status->value : $status,
         ]);
     }
 }

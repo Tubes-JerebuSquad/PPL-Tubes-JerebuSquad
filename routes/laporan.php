@@ -8,8 +8,10 @@ Route::middleware(['auth', 'masyarakat'])
     ->name('masyarakat.laporan.')
     ->group(function (): void {
         Route::get('/', [LaporanController::class, 'index'])->name('index');
-        Route::get('/{laporan}', [LaporanController::class, 'show'])->name('show');
-        Route::get('/{laporan}/perbaiki', [LaporanController::class, 'edit'])->name('edit');
-        Route::put('/{laporan}/perbaiki', [LaporanController::class, 'update'])->name('update');
-        Route::get('/{laporan}/media/{berkasMedia}', [LaporanController::class, 'media'])->name('media');
+        Route::get('/{laporan}', [LaporanController::class, 'show'])->whereNumber('laporan')->name('show');
+        Route::get('/{laporan}/perbaiki', [LaporanController::class, 'edit'])->whereNumber('laporan')->name('edit');
+        Route::put('/{laporan}/perbaiki', [LaporanController::class, 'update'])->whereNumber('laporan')->name('update');
+        Route::get('/{laporan}/media/{berkasMedia}', [LaporanController::class, 'media'])
+            ->whereNumber(['laporan', 'berkasMedia'])
+            ->name('media');
     });

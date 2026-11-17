@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Laporan #'.$laporan->nomor_laporan.' — RimbaWatch')
-@section('breadcrumb', 'Laporan Saya / #'.$laporan->nomor_laporan)
+@section('title', 'Laporan #'.$laporan->kode_laporan.' — RimbaWatch')
+@section('breadcrumb', 'Laporan Saya / #'.$laporan->kode_laporan)
 
 @section('content')
     @php
@@ -21,7 +21,7 @@
             <div>
                 <p class="text-xs font-semibold uppercase tracking-[0.16em] text-rimba-600">PBI-09 · Pelacakan Laporan</p>
                 <h1 class="mt-2 text-3xl font-bold tracking-tight text-rimba-900">
-                    Laporan #{{ $laporan->nomor_laporan }}
+                    Laporan #{{ $laporan->kode_laporan }}
                 </h1>
                 <div class="mt-3 flex flex-wrap items-center gap-2">
                     <x-ui.badge :variant="$laporan->varianStatus()">
@@ -31,12 +31,12 @@
                         {{ $laporan->labelKategori() }}
                     </x-ui.badge>
                     <span class="text-xs text-ink-400">
-                        Diperbarui {{ $laporan->updated_at?->format('d M Y • H:i') ?? '-' }}
+                        Diperbarui {{ $laporan->diperbarui_pada?->format('d M Y • H:i') ?? $laporan->dibuat_pada?->format('d M Y • H:i') ?? '-' }}
                     </span>
                 </div>
             </div>
 
-            @if ($laporan->bolehDiperbaiki())
+            @if ($laporan->bisaDiubahPelapor())
                 <a href="{{ route('masyarakat.laporan.edit', $laporan) }}" class="btn-primary shrink-0">
                     Perbaiki &amp; kirim ulang
                 </a>
@@ -44,7 +44,7 @@
         </div>
     </div>
 
-    @if ($laporan->bolehDiperbaiki())
+    @if ($laporan->bisaDiubahPelapor())
         <div class="mb-6 rounded-xl border border-amber-ink/20 bg-amber-soft px-5 py-4 text-sm text-amber-ink" role="status">
             <p class="font-semibold">Laporan dikembalikan untuk perbaikan</p>
             <p class="mt-1">
@@ -72,7 +72,7 @@
                     <div>
                         <dt class="text-xs font-medium uppercase tracking-wide text-ink-400">Waktu kejadian</dt>
                         <dd class="mt-1 text-sm text-ink-700">
-                            {{ $laporan->waktu_kejadian?->format('d M Y • H:i') ?? 'Tidak dicantumkan' }}
+                            {{ $laporan->insiden_pada?->format('d M Y • H:i') ?? 'Tidak dicantumkan' }}
                         </dd>
                     </div>
 
@@ -89,7 +89,11 @@
                     <div class="sm:col-span-2">
                         <dt class="text-xs font-medium uppercase tracking-wide text-ink-400">Koordinat lokasi</dt>
                         <dd class="mt-1 font-mono text-sm text-ink-700">
-                            {{ number_format((float) $laporan->latitude, 6) }}, {{ number_format((float) $laporan->longitude, 6) }}
+                            @if ($koordinat['latitude'] !== null && $koordinat['longitude'] !== null)
+                                {{ number_format((float) $koordinat['latitude'], 6) }}, {{ number_format((float) $koordinat['longitude'], 6) }}
+                            @else
+                                -
+                            @endif
                         </dd>
                     </div>
 
@@ -99,19 +103,25 @@
                     </div>
                 </dl>
 
-                @if ($revisiTerbaru && $revisiTerbaru->foto->isNotEmpty())
+                @if ($revisiTerbaru && $revisiTerbaru->berkasMedia->isNotEmpty())
                     <div class="mt-6 border-t border-line pt-5">
-                        <h3 class="text-xs font-semibold uppercase tracking-wide text-ink-400">Foto lampiran terkini</h3>
+                        <h3 class="text-xs font-semibold uppercase tracking-wide text-ink-400">Lampiran bukti terkini</h3>
                         <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                            @foreach ($revisiTerbaru->foto as $foto)
-                                <a href="{{ route('masyarakat.laporan.media', [$laporan, $foto]) }}" target="_blank" class="group block overflow-hidden rounded-lg border border-line bg-rimba-50">
-                                    <img
-                                        src="{{ route('masyarakat.laporan.media', [$laporan, $foto]) }}"
-                                        alt="{{ $foto->nama_asli }}"
-                                        loading="lazy"
-                                        class="h-28 w-full object-cover transition group-hover:scale-105"
-                                    >
-                                    <p class="truncate px-2.5 py-1.5 text-xs text-ink-500">{{ $foto->nama_asli }}</p>
+                            @foreach ($revisiTerbaru->berkasMedia as $media)
+                                <a href="{{ route('masyarakat.laporan.media', [$laporan, $media]) }}" target="_blank" class="group block overflow-hidden rounded-lg border border-line bg-rimba-50">
+                                    @if ($media->isFoto())
+                                        <img
+                                            src="{{ route('masyarakat.laporan.media', [$laporan, $media]) }}"
+                                            alt="{{ $media->nama_file_asli }}"
+                                            loading="lazy"
+                                            class="h-28 w-full object-cover transition group-hover:scale-105"
+                                        >
+                                    @else
+                                        <div class="flex h-28 items-center justify-center bg-rimba-100 text-xs font-semibold text-rimba-700">
+                                            Video lampiran
+                                        </div>
+                                    @endif
+                                    <p class="truncate px-2.5 py-1.5 text-xs text-ink-500">{{ $media->nama_file_asli }}</p>
                                 </a>
                             @endforeach
                         </div>
@@ -131,18 +141,18 @@
                                     Revisi #{{ $revisi->nomor_revisi }} · {{ $revisi->labelKategori() }}
                                 </p>
                                 <span class="text-xs text-ink-400">
-                                    {{ $revisi->created_at?->format('d M Y • H:i') ?? '-' }}
+                                    {{ $revisi->dibuat_pada?->format('d M Y • H:i') ?? '-' }}
                                 </span>
                             </div>
 
                             <p class="mt-2 whitespace-pre-line text-sm text-ink-500">{{ $revisi->deskripsi }}</p>
 
-                            @if ($revisi->catatan_revisi)
-                                <p class="mt-2 text-xs italic text-ink-400">Catatan pelapor: {{ $revisi->catatan_revisi }}</p>
+                            @if ($revisi->alasan_revisi)
+                                <p class="mt-2 text-xs italic text-ink-400">Catatan pelapor: {{ $revisi->alasan_revisi }}</p>
                             @endif
 
-                            @if ($revisi->foto->isNotEmpty())
-                                <p class="mt-2 text-xs text-ink-400">Lampiran: {{ $revisi->foto->count() }} foto</p>
+                            @if ($revisi->berkasMedia->isNotEmpty())
+                                <p class="mt-2 text-xs text-ink-400">Lampiran: {{ $revisi->berkasMedia->count() }} berkas</p>
                             @endif
                         </article>
                     @empty
@@ -164,7 +174,7 @@
                             <div class="min-w-0">
                                 <p class="text-sm font-semibold text-ink-900">{{ $peristiwa->labelJenis() }}</p>
                                 <p class="mt-0.5 text-xs text-ink-400">
-                                    {{ $peristiwa->waktu_peristiwa?->format('d M Y • H:i') ?? $peristiwa->created_at?->format('d M Y • H:i') ?? '-' }}
+                                    {{ $peristiwa->terjadi_pada?->format('d M Y • H:i') ?? '-' }}
                                 </p>
 
                                 @if ($peristiwa->labelStatusLama() || $peristiwa->labelStatusBaru())
@@ -175,19 +185,25 @@
                                     </p>
                                 @endif
 
-                                @if ($peristiwa->catatan_publik)
-                                    <p class="mt-1.5 rounded-lg bg-amber-soft px-2.5 py-2 text-xs text-amber-ink">
-                                        {{ $peristiwa->catatan_publik }}
+                                @if ($peristiwa->catatan_peristiwa)
+                                    @php
+                                        $isPengembalian = in_array(strtoupper((string) $peristiwa->jenis_peristiwa), ['PERMINTAAN_PERBAIKAN', 'DIKEMBALIKAN'], true)
+                                            || strtoupper((string) $peristiwa->status_baru) === \App\Models\Laporan::STATUS_DIKEMBALIKAN;
+                                    @endphp
+                                    <p @class([
+                                        'mt-1.5 text-xs',
+                                        'rounded-lg bg-amber-soft px-2.5 py-2 text-amber-ink' => $isPengembalian,
+                                        'text-ink-500' => ! $isPengembalian,
+                                    ])>
+                                        {{ $peristiwa->catatan_peristiwa }}
                                     </p>
-                                @elseif ($peristiwa->deskripsi)
-                                    <p class="mt-1 text-xs text-ink-500">{{ $peristiwa->deskripsi }}</p>
                                 @endif
                             </div>
                         </li>
                     @empty
                         <li class="text-sm text-ink-400">
                             Status saat ini: <strong class="text-ink-700">{{ $laporan->labelStatus() }}</strong>
-                            ({{ $laporan->updated_at?->format('d M Y • H:i') ?? '-' }}).
+                            ({{ $laporan->diperbarui_pada?->format('d M Y • H:i') ?? $laporan->dibuat_pada?->format('d M Y • H:i') ?? '-' }}).
                         </li>
                     @endforelse
                 </ol>

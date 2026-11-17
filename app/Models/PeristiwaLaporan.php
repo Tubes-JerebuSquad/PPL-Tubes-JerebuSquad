@@ -11,13 +11,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'laporan_id',
-    'pengguna_id',
+    'aktor_id',
     'jenis_peristiwa',
     'status_lama',
     'status_baru',
-    'deskripsi',
-    'catatan_publik',
-    'waktu_peristiwa',
+    'catatan_peristiwa',
+    'terjadi_pada',
 ])]
 class PeristiwaLaporan extends Model
 {
@@ -26,13 +25,18 @@ class PeristiwaLaporan extends Model
 
     protected $table = 'peristiwa_laporan';
 
+    protected $primaryKey = 'peristiwa_id';
+
+    // Waktu kejadian disimpan di kolom terjadi_pada (default waktu sekarang di database).
+    public $timestamps = false;
+
     /**
      * @return array<string, string>
      */
     protected function casts(): array
     {
         return [
-            'waktu_peristiwa' => 'datetime',
+            'terjadi_pada' => 'datetime',
         ];
     }
 
@@ -41,22 +45,22 @@ class PeristiwaLaporan extends Model
      */
     public function laporan(): BelongsTo
     {
-        return $this->belongsTo(Laporan::class, 'laporan_id', 'id');
+        return $this->belongsTo(Laporan::class, 'laporan_id', 'laporan_id');
     }
 
     /**
      * @return BelongsTo<Pengguna, $this>
      */
-    public function pengguna(): BelongsTo
+    public function aktor(): BelongsTo
     {
-        return $this->belongsTo(Pengguna::class, 'pengguna_id', 'pengguna_id');
+        return $this->belongsTo(Pengguna::class, 'aktor_id', 'pengguna_id');
     }
 
     public function labelJenis(): string
     {
         return match (strtoupper((string) $this->jenis_peristiwa)) {
             'DIAJUKAN' => 'Laporan Diajukan',
-            'PERMINTAAN_PERBAIKAN', 'DIKEMBALIKAN' => 'Diminta Perbaikan',
+            'PERMINTAAN_PERBAIKAN', 'DIKEMBALIKAN' => 'Dikembalikan untuk Perbaikan',
             'PERBAIKAN_DIKIRIM' => 'Perbaikan Dikirim Ulang',
             'DIVERIFIKASI', 'DITERIMA' => 'Laporan Diverifikasi',
             'DITOLAK' => 'Laporan Ditolak',
@@ -73,7 +77,7 @@ class PeristiwaLaporan extends Model
         }
 
         return StatusLaporan::dariNilai($this->status_lama)?->label()
-            ?? ucwords(str_replace('_', ' ', $this->status_lama));
+            ?? ucwords(strtolower(str_replace('_', ' ', $this->status_lama)));
     }
 
     public function labelStatusBaru(): ?string
@@ -83,6 +87,6 @@ class PeristiwaLaporan extends Model
         }
 
         return StatusLaporan::dariNilai($this->status_baru)?->label()
-            ?? ucwords(str_replace('_', ' ', $this->status_baru));
+            ?? ucwords(strtolower(str_replace('_', ' ', $this->status_baru)));
     }
 }

@@ -24,7 +24,7 @@
             <div class="flex shrink-0 flex-wrap items-center gap-2">
                 <!-- Tombol Buat Laporan Cepat -->
                 <a 
-                    href="{{ url('/lapor') }}" 
+                    href="{{ route('masyarakat.laporan.create') }}" 
                     class="btn-primary inline-flex shrink-0 items-center gap-2 whitespace-nowrap text-xs">
                     <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -139,13 +139,13 @@
                         <tbody class="divide-y divide-line">
                             @foreach ($riwayatLaporan as $item)
                                 @php
-                                    $statusEnum = \App\Enums\StatusLaporan::dariNilai($item->status ?? null);
+                                    $statusEnum = \App\Enums\StatusLaporan::dariNilai($item->status_laporan ?? null);
                                     $kategoriEnum = \App\Enums\KategoriLaporan::dariNilai($item->kategori ?? null);
                                 @endphp
                                 <tr class="hover:bg-rimba-50/40">
                                     <td class="py-3 px-3 font-mono text-xs">
-                                        <a href="{{ route('masyarakat.laporan.show', $item->id) }}" class="font-semibold text-rimba-600 hover:underline">
-                                            #{{ $item->nomor_laporan ?? $item->id }}
+                                        <a href="{{ route('masyarakat.laporan.show', $item->laporan_id) }}" class="font-semibold text-rimba-600 hover:underline">
+                                            #{{ $item->kode_laporan ?? $item->laporan_id }}
                                         </a>
                                     </td>
                                     <td class="py-3 px-3 font-medium text-ink-900">
@@ -154,16 +154,16 @@
                                     <td class="py-3 px-3">
                                         <div class="flex flex-wrap items-center gap-2">
                                             <x-ui.badge :variant="$statusEnum?->variant() ?? 'neutral'">
-                                                {{ $statusEnum?->label() ?? ucwords(str_replace('_', ' ', (string) ($item->status ?? 'TERKIRIM'))) }}
+                                                {{ $statusEnum?->label() ?? ucwords(strtolower(str_replace('_', ' ', (string) ($item->status_laporan ?? 'TERKIRIM')))) }}
                                             </x-ui.badge>
                                             @if ($statusEnum?->bolehDieditPelapor())
-                                                <a href="{{ route('masyarakat.laporan.edit', $item->id) }}" class="text-xs font-semibold text-amber-ink hover:underline">
+                                                <a href="{{ route('masyarakat.laporan.edit', $item->laporan_id) }}" class="text-xs font-semibold text-amber-ink hover:underline">
                                                     Perbaiki
                                                 </a>
                                             @endif
                                         </div>
                                     </td>
-                                    <td class="py-3 px-3 text-xs text-ink-400">{{ $item->created_at ?? '-' }}</td>
+                                    <td class="py-3 px-3 text-xs text-ink-400">{{ $item->dibuat_pada ?? '-' }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

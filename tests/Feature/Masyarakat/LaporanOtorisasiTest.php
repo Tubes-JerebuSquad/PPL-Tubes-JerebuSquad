@@ -34,7 +34,7 @@ class LaporanOtorisasiTest extends TestCase
 
     public function test_tamu_diarahkan_ke_login_untuk_semua_rute_laporan_saya(): void
     {
-        $laporan = Laporan::factory()->perluPerbaikan()->create([
+        $laporan = Laporan::factory()->dikembalikan()->create([
             'pelapor_id' => $this->pelaporA->pengguna_id,
         ]);
 
@@ -46,7 +46,7 @@ class LaporanOtorisasiTest extends TestCase
 
     public function test_peran_non_masyarakat_ditolak_mengakses_rute_laporan_saya(): void
     {
-        $laporan = Laporan::factory()->perluPerbaikan()->create([
+        $laporan = Laporan::factory()->dikembalikan()->create([
             'pelapor_id' => $this->pelaporA->pengguna_id,
         ]);
 
@@ -66,17 +66,21 @@ class LaporanOtorisasiTest extends TestCase
 
     public function test_pelapor_tidak_dapat_melihat_atau_mengubah_laporan_milik_orang_lain(): void
     {
-        $laporanMilikA = Laporan::factory()->perluPerbaikan()->create([
+        $laporanMilikA = Laporan::factory()->dikembalikan()->create([
             'pelapor_id' => $this->pelaporA->pengguna_id,
         ]);
 
-        $revisi = RevisiLaporan::factory()->create(['laporan_id' => $laporanMilikA->id, 'nomor_revisi' => 1]);
+        $revisi = RevisiLaporan::factory()->create([
+            'laporan_id' => $laporanMilikA->laporan_id,
+            'nomor_revisi' => 1,
+            'diedit_oleh' => $this->pelaporA->pengguna_id,
+        ]);
         $media = BerkasMedia::factory()->create([
-            'path_file' => 'laporan/privat/rahasia.jpg',
+            'kunci_penyimpanan' => 'laporan/privat/rahasia.jpg',
             'diunggah_oleh' => $this->pelaporA->pengguna_id,
         ]);
-        Storage::disk('local')->put($media->path_file, 'gambar');
-        $revisi->foto()->attach($media->id, ['urutan_tampilan' => 1]);
+        Storage::disk('local')->put($media->kunci_penyimpanan, 'gambar');
+        $revisi->berkasMedia()->attach($media->berkas_media_id, ['urutan_tampilan' => 1]);
 
         $this->actingAs($this->pelaporB)
             ->get(route('masyarakat.laporan.show', $laporanMilikA))
@@ -92,7 +96,7 @@ class LaporanOtorisasiTest extends TestCase
                 'wilayah_id' => $laporanMilikA->wilayah_id,
                 'latitude' => 0.1,
                 'longitude' => 101.1,
-                'deskripsi' => 'Percobaan ubah laporan orang lain.',
+                'deskripsi' => 'Percobaan ubah laporan milik pelapor lain.',
             ])
             ->assertForbidden();
 
@@ -135,20 +139,24 @@ class LaporanOtorisasiTest extends TestCase
                 ->assertForbidden();
 
             $this->assertSame('Deskripsi asli sebelum terkunci.', $laporan->fresh()->deskripsi);
-            $this->assertSame($status->value, $laporan->fresh()->status);
+            $this->assertSame($status->value, $laporan->fresh()->status_laporan);
         }
     }
 
     public function test_pelapor_tidak_dapat_mencantumkan_media_milik_laporan_orang_lain(): void
     {
-        $laporanA = Laporan::factory()->perluPerbaikan()->create([
+        $laporanA = Laporan::factory()->dikembalikan()->create([
             'pelapor_id' => $this->pelaporA->pengguna_id,
         ]);
-        $revisiA = RevisiLaporan::factory()->create(['laporan_id' => $laporanA->id, 'nomor_revisi' => 1]);
+        $revisiA = RevisiLaporan::factory()->create([
+            'laporan_id' => $laporanA->laporan_id,
+            'nomor_revisi' => 1,
+            'diedit_oleh' => $this->pelaporA->pengguna_id,
+        ]);
         $mediaMilikA = BerkasMedia::factory()->create(['diunggah_oleh' => $this->pelaporA->pengguna_id]);
-        $revisiA->foto()->attach($mediaMilikA->id, ['urutan_tampilan' => 1]);
+        $revisiA->berkasMedia()->attach($mediaMilikA->berkas_media_id, ['urutan_tampilan' => 1]);
 
-        $laporanB = Laporan::factory()->perluPerbaikan()->create([
+        $laporanB = Laporan::factory()->dikembalikan()->create([
             'pelapor_id' => $this->pelaporB->pengguna_id,
         ]);
 
@@ -159,26 +167,30 @@ class LaporanOtorisasiTest extends TestCase
                 'latitude' => 0.5,
                 'longitude' => 101.5,
                 'deskripsi' => 'Mencoba menyematkan media dari laporan orang lain.',
-                'pertahankan_foto' => [$mediaMilikA->id],
+                'pertahankan_foto' => [$mediaMilikA->berkas_media_id],
             ])
             ->assertSessionHasNoErrors();
 
         $revisiBaruB = $laporanB->fresh()->revisiTerbaru;
         $this->assertNotNull($revisiBaruB);
-        $this->assertCount(0, $revisiBaruB->foto);
+        $this->assertCount(0, $revisiBaruB->berkasMedia);
     }
 
     public function test_pelapor_dapat_mengakses_media_miliknya_dan_ditolak_jika_bukan_media_laporan_tersebut(): void
     {
         $laporanA1 = Laporan::factory()->create(['pelapor_id' => $this->pelaporA->pengguna_id]);
-        $revisiA1 = RevisiLaporan::factory()->create(['laporan_id' => $laporanA1->id, 'nomor_revisi' => 1]);
+        $revisiA1 = RevisiLaporan::factory()->create([
+            'laporan_id' => $laporanA1->laporan_id,
+            'nomor_revisi' => 1,
+            'diedit_oleh' => $this->pelaporA->pengguna_id,
+        ]);
         $mediaA1 = BerkasMedia::factory()->create([
-            'path_file' => 'laporan/a1/foto.jpg',
-            'mime_type' => 'image/jpeg',
+            'kunci_penyimpanan' => 'laporan/a1/foto.jpg',
+            'tipe_mime' => 'image/jpeg',
             'diunggah_oleh' => $this->pelaporA->pengguna_id,
         ]);
-        Storage::disk('local')->put($mediaA1->path_file, 'isi-gambar-valid');
-        $revisiA1->foto()->attach($mediaA1->id, ['urutan_tampilan' => 1]);
+        Storage::disk('local')->put($mediaA1->kunci_penyimpanan, 'isi-gambar-valid');
+        $revisiA1->berkasMedia()->attach($mediaA1->berkas_media_id, ['urutan_tampilan' => 1]);
 
         $laporanA2 = Laporan::factory()->create(['pelapor_id' => $this->pelaporA->pengguna_id]);
 

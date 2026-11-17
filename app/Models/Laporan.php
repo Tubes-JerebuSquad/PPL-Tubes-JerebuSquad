@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\KategoriLaporan;
 use App\Enums\StatusLaporan;
+use App\Support\LokasiSpasial;
 use Database\Factories\LaporanFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,29 +14,48 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
-    'nomor_laporan',
+    'kode_laporan',
     'pelapor_id',
     'wilayah_id',
     'kawasan_id',
     'kategori',
     'deskripsi',
-    'latitude',
-    'longitude',
-    'waktu_kejadian',
-    'status',
+    'insiden_pada',
+    'status_laporan',
+    'diserahkan_pada',
 ])]
 class Laporan extends Model
 {
     /** @use HasFactory<LaporanFactory> */
     use HasFactory;
 
+    public const CREATED_AT = 'dibuat_pada';
+
+    public const UPDATED_AT = 'diperbarui_pada';
+
+    public const STATUS_DRAFT = 'DRAFT';
+
+    public const STATUS_MENUNGGU_VERIFIKASI = 'MENUNGGU_VERIFIKASI';
+
+    public const STATUS_DIKEMBALIKAN = 'DIKEMBALIKAN';
+
+    public const STATUS_DIVERIFIKASI = 'DIVERIFIKASI';
+
+    public const STATUS_DITOLAK = 'DITOLAK';
+
+    public const STATUS_DALAM_INSPEKSI = 'DALAM_INSPEKSI';
+
+    public const STATUS_SELESAI = 'SELESAI';
+
     protected $table = 'laporan';
+
+    protected $primaryKey = 'laporan_id';
 
     /**
      * @var array<string, mixed>
      */
     protected $attributes = [
-        'status' => StatusLaporan::MENUNGGU_VERIFIKASI->value,
+        'status_laporan' => self::STATUS_MENUNGGU_VERIFIKASI,
     ];
 
     /**
@@ -44,10 +64,29 @@ class Laporan extends Model
     protected function casts(): array
     {
         return [
-            'latitude' => 'float',
-            'longitude' => 'float',
-            'waktu_kejadian' => 'datetime',
+            'insiden_pada' => 'datetime',
+            'diserahkan_pada' => 'datetime',
+            'dibuat_pada' => 'datetime',
+            'diperbarui_pada' => 'datetime',
         ];
+    }
+
+    /**
+     * Pelapor hanya boleh mengubah laporan berstatus draf atau dikembalikan (FR-09).
+     */
+    public function bisaDiubahPelapor(): bool
+    {
+        return $this->statusEnum()?->bolehDieditPelapor() ?? false;
+    }
+
+    public function bolehDiperbaiki(): bool
+    {
+        return $this->bisaDiubahPelapor();
+    }
+
+    public function terkunci(): bool
+    {
+        return ! $this->bisaDiubahPelapor();
     }
 
     /**
@@ -75,13 +114,13 @@ class Laporan extends Model
     }
 
     /**
-     * Seluruh versi revisi laporan (append-only), diurutkan dari versi terbaru.
+     * Riwayat revisi bersifat append-only, diurutkan dari versi terbaru ke terlama.
      *
      * @return HasMany<RevisiLaporan, $this>
      */
     public function revisi(): HasMany
     {
-        return $this->hasMany(RevisiLaporan::class, 'laporan_id', 'id')
+        return $this->hasMany(RevisiLaporan::class, 'laporan_id', 'laporan_id')
             ->orderByDesc('nomor_revisi');
     }
 
@@ -90,7 +129,7 @@ class Laporan extends Model
      */
     public function revisiTerbaru(): HasOne
     {
-        return $this->hasOne(RevisiLaporan::class, 'laporan_id', 'id')
+        return $this->hasOne(RevisiLaporan::class, 'laporan_id', 'laporan_id')
             ->ofMany('nomor_revisi', 'max');
     }
 
@@ -101,19 +140,19 @@ class Laporan extends Model
      */
     public function peristiwa(): HasMany
     {
-        return $this->hasMany(PeristiwaLaporan::class, 'laporan_id', 'id')
-            ->orderByDesc('waktu_peristiwa')
-            ->orderByDesc('id');
+        return $this->hasMany(PeristiwaLaporan::class, 'laporan_id', 'laporan_id')
+            ->orderByDesc('terjadi_pada')
+            ->orderByDesc('peristiwa_id');
     }
 
     public function statusEnum(): ?StatusLaporan
     {
-        return StatusLaporan::dariNilai($this->status);
+        return StatusLaporan::dariNilai($this->status_laporan);
     }
 
     public function labelStatus(): string
     {
-        return $this->statusEnum()?->label() ?? ucwords(str_replace('_', ' ', (string) $this->status));
+        return $this->statusEnum()?->label() ?? ucwords(strtolower(str_replace('_', ' ', (string) $this->status_laporan)));
     }
 
     public function varianStatus(): string
@@ -132,32 +171,46 @@ class Laporan extends Model
         return $this->pelapor_id !== null && (int) $this->pelapor_id === (int) $pengguna->pengguna_id;
     }
 
-    public function bolehDiperbaiki(): bool
-    {
-        return $this->statusEnum()?->bolehDieditPelapor() ?? false;
-    }
-
-    public function terkunci(): bool
-    {
-        return ! $this->bolehDiperbaiki();
-    }
-
     /**
-     * Catatan pengembalian yang boleh dilihat pelapor saat diminta perbaikan.
+     * Catatan pengembalian terakhir yang aman ditampilkan kepada pelapor.
      */
     public function catatanPerbaikanTerbaru(): ?string
     {
         $peristiwa = $this->relationLoaded('peristiwa')
-            ? $this->peristiwa->first(fn (PeristiwaLaporan $item): bool => filled($item->catatan_publik))
-            : $this->peristiwa()->whereNotNull('catatan_publik')->first();
+            ? $this->peristiwa->first(function (PeristiwaLaporan $item): bool {
+                return in_array(
+                    strtoupper((string) $item->jenis_peristiwa),
+                    ['PERMINTAAN_PERBAIKAN', 'DIKEMBALIKAN'],
+                    true,
+                ) || strtoupper((string) $item->status_baru) === self::STATUS_DIKEMBALIKAN;
+            })
+            : $this->peristiwa()
+                ->where(function ($query): void {
+                    $query->whereIn('jenis_peristiwa', ['PERMINTAAN_PERBAIKAN', 'DIKEMBALIKAN'])
+                        ->orWhere('status_baru', self::STATUS_DIKEMBALIKAN);
+                })
+                ->first();
 
-        return $peristiwa?->catatan_publik;
+        return $peristiwa?->catatan_peristiwa;
     }
 
     public function memuatMedia(BerkasMedia $media): bool
     {
         return $this->revisi()
-            ->whereHas('foto', fn ($query) => $query->where('berkas_media.id', $media->id))
+            ->whereHas('berkasMedia', fn ($query) => $query->where('berkas_media.berkas_media_id', $media->berkas_media_id))
             ->exists();
+    }
+
+    /**
+     * @return array{latitude: float|null, longitude: float|null}
+     */
+    public function koordinat(): array
+    {
+        return LokasiSpasial::koordinatDariTabel(
+            $this->table,
+            $this->primaryKey,
+            (int) $this->laporan_id,
+            $this->getAttribute('lokasi'),
+        );
     }
 }

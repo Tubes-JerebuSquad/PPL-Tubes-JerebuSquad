@@ -17,9 +17,14 @@
             </p>
         </div>
 
-        <a href="{{ route('masyarakat.dashboard') }}" class="btn-secondary shrink-0">
-            Kembali ke dashboard
-        </a>
+        <div class="flex shrink-0 flex-wrap gap-2">
+            <a href="{{ route('masyarakat.laporan.create') }}" class="btn-primary">
+                + Ajukan laporan
+            </a>
+            <a href="{{ route('masyarakat.dashboard') }}" class="btn-secondary">
+                Dashboard
+            </a>
+        </div>
     </div>
 
     <x-ui.card class="overflow-hidden">
@@ -31,7 +36,7 @@
                     name="cari"
                     type="search"
                     value="{{ old('cari', request('cari')) }}"
-                    placeholder="Nomor laporan, kategori, atau uraian..."
+                    placeholder="Kode laporan, kategori, atau uraian..."
                     class="field-input"
                     @error('cari') aria-invalid="true" aria-describedby="cari-error" @enderror
                 >
@@ -83,6 +88,9 @@
                         <p class="mt-1 text-sm text-ink-400">
                             Laporan indikasi kerusakan kawasan yang Anda ajukan akan tampil di halaman ini.
                         </p>
+                        <a href="{{ route('masyarakat.laporan.create') }}" class="btn-primary mt-4">
+                            Ajukan laporan pertama
+                        </a>
                     @endif
                 </div>
             </div>
@@ -93,7 +101,7 @@
                     <li class="p-5">
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
-                                <p class="font-mono text-xs text-ink-400">#{{ $laporan->nomor_laporan }}</p>
+                                <p class="font-mono text-xs text-ink-400">#{{ $laporan->kode_laporan }}</p>
                                 <a href="{{ route('masyarakat.laporan.show', $laporan) }}" class="mt-0.5 block font-semibold text-ink-900 hover:text-rimba-600">
                                     {{ $laporan->labelKategori() }}
                                 </a>
@@ -109,14 +117,14 @@
 
                         <div class="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3 text-xs">
                             <span class="text-ink-400">
-                                Diperbarui: {{ $laporan->updated_at?->format('d M Y • H:i') ?? '-' }}
+                                Diperbarui: {{ $laporan->diperbarui_pada?->format('d M Y • H:i') ?? $laporan->dibuat_pada?->format('d M Y • H:i') ?? '-' }}
                             </span>
 
                             <div class="flex items-center gap-3">
                                 <a href="{{ route('masyarakat.laporan.show', $laporan) }}" class="font-semibold text-rimba-600 hover:text-rimba-700">
                                     Detail
                                 </a>
-                                @if ($laporan->bolehDiperbaiki())
+                                @if ($laporan->bisaDiubahPelapor())
                                     <a href="{{ route('masyarakat.laporan.edit', $laporan) }}" class="font-semibold text-amber-ink hover:underline">
                                         Perbaiki
                                     </a>
@@ -133,7 +141,7 @@
                     <caption class="sr-only">Daftar laporan saya</caption>
                     <thead>
                         <tr class="border-b border-line text-[11px] uppercase tracking-[0.12em] text-ink-400">
-                            <th scope="col" class="px-4 py-3 font-semibold">Nomor &amp; Kategori</th>
+                            <th scope="col" class="px-4 py-3 font-semibold">Kode &amp; Kategori</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Wilayah</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Status</th>
                             <th scope="col" class="px-4 py-3 font-semibold">Perubahan Terakhir</th>
@@ -144,7 +152,7 @@
                         @foreach ($daftarLaporan as $laporan)
                             <tr class="transition hover:bg-rimba-50/70">
                                 <td class="px-4 py-4">
-                                    <p class="font-mono text-xs text-ink-400">#{{ $laporan->nomor_laporan }}</p>
+                                    <p class="font-mono text-xs text-ink-400">#{{ $laporan->kode_laporan }}</p>
                                     <a href="{{ route('masyarakat.laporan.show', $laporan) }}" class="mt-0.5 block font-semibold text-ink-900 hover:text-rimba-600">
                                         {{ $laporan->labelKategori() }}
                                     </a>
@@ -161,12 +169,12 @@
                                     </x-ui.badge>
                                 </td>
                                 <td class="px-4 py-4 text-ink-500">
-                                    {{ $laporan->updated_at?->format('d M Y • H:i') ?? '-' }}
+                                    {{ $laporan->diperbarui_pada?->format('d M Y • H:i') ?? $laporan->dibuat_pada?->format('d M Y • H:i') ?? '-' }}
                                 </td>
                                 <td class="px-4 py-4 text-right">
                                     <div class="flex justify-end gap-2">
                                         <a href="{{ route('masyarakat.laporan.show', $laporan) }}" class="btn-secondary">Detail</a>
-                                        @if ($laporan->bolehDiperbaiki())
+                                        @if ($laporan->bisaDiubahPelapor())
                                             <a href="{{ route('masyarakat.laporan.edit', $laporan) }}" class="btn-primary">Perbaiki</a>
                                         @endif
                                     </div>

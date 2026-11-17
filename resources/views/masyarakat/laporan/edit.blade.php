@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Perbaiki Laporan #'.$laporan->nomor_laporan.' — RimbaWatch')
+@section('title', 'Perbaiki Laporan #'.$laporan->kode_laporan.' — RimbaWatch')
 @section('breadcrumb', 'Laporan Saya / Perbaiki')
 
 @section('content')
     @php
         $catatanPengawas = $laporan->catatanPerbaikanTerbaru();
         $revisiTerbaru = $laporan->revisiTerbaru;
-        $fotoSebelumnya = $revisiTerbaru?->foto ?? collect();
+        $mediaSebelumnya = $revisiTerbaru?->berkasMedia ?? collect();
     @endphp
 
     <div class="mb-8">
@@ -20,7 +20,7 @@
 
         <p class="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-rimba-600">PBI-09 · Perbaikan Laporan</p>
         <h1 class="mt-2 text-3xl font-bold tracking-tight text-rimba-900">
-            Perbaiki Laporan #{{ $laporan->nomor_laporan }}
+            Perbaiki Laporan #{{ $laporan->kode_laporan }}
         </h1>
         <p class="mt-2 max-w-2xl text-sm text-ink-500">
             Lengkapi atau perbaiki data laporan Anda di bawah ini, lalu kirim ulang untuk ditinjau kembali oleh Pengawas.
@@ -67,16 +67,16 @@
                     </div>
 
                     <div>
-                        <label for="waktu_kejadian" class="field-label">Waktu kejadian / perkiraan</label>
+                        <label for="insiden_pada" class="field-label">Waktu kejadian / perkiraan</label>
                         <input
-                            id="waktu_kejadian"
-                            name="waktu_kejadian"
+                            id="insiden_pada"
+                            name="insiden_pada"
                             type="datetime-local"
-                            value="{{ old('waktu_kejadian', $laporan->waktu_kejadian?->format('Y-m-d\TH:i')) }}"
+                            value="{{ old('insiden_pada', $laporan->insiden_pada?->format('Y-m-d\TH:i')) }}"
                             class="field-input"
-                            @error('waktu_kejadian') aria-invalid="true" aria-describedby="waktu_kejadian-error" @enderror
+                            @error('insiden_pada') aria-invalid="true" aria-describedby="insiden_pada-error" @enderror
                         >
-                        <x-ui.field-error name="waktu_kejadian" />
+                        <x-ui.field-error name="insiden_pada" />
                     </div>
 
                     <div>
@@ -125,7 +125,7 @@
                             step="any"
                             min="-90"
                             max="90"
-                            value="{{ old('latitude', $laporan->latitude) }}"
+                            value="{{ old('latitude', $koordinat['latitude']) }}"
                             class="field-input"
                             required
                             @error('latitude') aria-invalid="true" aria-describedby="latitude-error" @enderror
@@ -142,7 +142,7 @@
                             step="any"
                             min="-180"
                             max="180"
-                            value="{{ old('longitude', $laporan->longitude) }}"
+                            value="{{ old('longitude', $koordinat['longitude']) }}"
                             class="field-input"
                             required
                             @error('longitude') aria-invalid="true" aria-describedby="longitude-error" @enderror
@@ -162,7 +162,8 @@
                             id="deskripsi"
                             name="deskripsi"
                             rows="4"
-                            maxlength="3000"
+                            minlength="20"
+                            maxlength="2000"
                             class="field-input"
                             required
                             @error('deskripsi') aria-invalid="true" aria-describedby="deskripsi-error" @enderror
@@ -171,17 +172,17 @@
                     </div>
 
                     <div>
-                        <label for="catatan_revisi" class="field-label">Ringkasan perbaikan yang dilakukan (opsional)</label>
+                        <label for="alasan_revisi" class="field-label">Ringkasan perbaikan yang dilakukan (opsional)</label>
                         <textarea
-                            id="catatan_revisi"
-                            name="catatan_revisi"
+                            id="alasan_revisi"
+                            name="alasan_revisi"
                             rows="2"
                             maxlength="1000"
                             placeholder="Contoh: Menambahkan koordinat akurat dan foto kondisi lokasi..."
                             class="field-input"
-                            @error('catatan_revisi') aria-invalid="true" aria-describedby="catatan_revisi-error" @enderror
-                        >{{ old('catatan_revisi') }}</textarea>
-                        <x-ui.field-error name="catatan_revisi" />
+                            @error('alasan_revisi') aria-invalid="true" aria-describedby="alasan_revisi-error" @enderror
+                        >{{ old('alasan_revisi') }}</textarea>
+                        <x-ui.field-error name="alasan_revisi" />
                     </div>
                 </div>
             </section>
@@ -189,30 +190,36 @@
             <section>
                 <h2 class="text-xs font-semibold uppercase tracking-[0.14em] text-ink-400">Foto pendukung</h2>
 
-                @if ($fotoSebelumnya->isNotEmpty())
+                @if ($mediaSebelumnya->isNotEmpty())
                     <div class="mt-4">
-                        <p class="text-sm font-medium text-ink-700">Foto pada versi sebelumnya (centang untuk tetap dilampirkan pada revisi baru)</p>
+                        <p class="text-sm font-medium text-ink-700">Lampiran pada versi sebelumnya (centang untuk tetap dilampirkan pada revisi baru)</p>
                         <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                            @foreach ($fotoSebelumnya as $foto)
+                            @foreach ($mediaSebelumnya as $media)
                                 @php
                                     $terpilih = old('pertahankan_foto') !== null
-                                        ? in_array((string) $foto->id, array_map('strval', (array) old('pertahankan_foto')), true)
+                                        ? in_array((string) $media->berkas_media_id, array_map('strval', (array) old('pertahankan_foto')), true)
                                         : true;
                                 @endphp
                                 <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-line bg-rimba-50/60 p-3">
                                     <input
                                         type="checkbox"
                                         name="pertahankan_foto[]"
-                                        value="{{ $foto->id }}"
+                                        value="{{ $media->berkas_media_id }}"
                                         @checked($terpilih)
                                         class="h-4 w-4 rounded border-line-strong text-rimba-600 focus:ring-rimba-600"
                                     >
-                                    <img
-                                        src="{{ route('masyarakat.laporan.media', [$laporan, $foto]) }}"
-                                        alt="{{ $foto->nama_asli }}"
-                                        class="h-12 w-12 shrink-0 rounded-lg object-cover"
-                                    >
-                                    <span class="min-w-0 truncate text-xs font-medium text-ink-700">{{ $foto->nama_asli }}</span>
+                                    @if ($media->isFoto())
+                                        <img
+                                            src="{{ route('masyarakat.laporan.media', [$laporan, $media]) }}"
+                                            alt="{{ $media->nama_file_asli }}"
+                                            class="h-12 w-12 shrink-0 rounded-lg object-cover"
+                                        >
+                                    @else
+                                        <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-rimba-100 text-[10px] font-semibold text-rimba-700">
+                                            Video
+                                        </span>
+                                    @endif
+                                    <span class="min-w-0 truncate text-xs font-medium text-ink-700">{{ $media->nama_file_asli }}</span>
                                 </label>
                             @endforeach
                         </div>

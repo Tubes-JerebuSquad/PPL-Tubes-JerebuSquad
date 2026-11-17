@@ -23,7 +23,7 @@ class PerbaikiLaporanRequest extends FormRequest
             && $pengguna->isMasyarakat()
             && $laporan instanceof Laporan
             && $laporan->milikPengguna($pengguna)
-            && $laporan->bolehDiperbaiki();
+            && $laporan->bisaDiubahPelapor();
     }
 
     protected function prepareForValidation(): void
@@ -58,9 +58,9 @@ class PerbaikiLaporanRequest extends FormRequest
             ],
             'latitude' => ['required', 'numeric', 'between:-90,90'],
             'longitude' => ['required', 'numeric', 'between:-180,180'],
-            'waktu_kejadian' => ['nullable', 'date', 'before_or_equal:now'],
-            'deskripsi' => ['required', 'string', 'min:10', 'max:3000'],
-            'catatan_revisi' => ['nullable', 'string', 'max:1000'],
+            'insiden_pada' => ['nullable', 'date', 'before_or_equal:now'],
+            'deskripsi' => ['required', 'string', 'min:20', 'max:2000'],
+            'alasan_revisi' => ['nullable', 'string', 'max:1000'],
             'pertahankan_foto' => ['nullable', 'array'],
             'pertahankan_foto.*' => ['integer'],
             'foto' => ['nullable', 'array', 'max:'.self::MAKSIMAL_FOTO],
@@ -83,12 +83,12 @@ class PerbaikiLaporanRequest extends FormRequest
             'latitude.between' => 'Latitude harus berada pada rentang -90 sampai 90.',
             'longitude.required' => 'Longitude wajib diisi.',
             'longitude.between' => 'Longitude harus berada pada rentang -180 sampai 180.',
-            'waktu_kejadian.date' => 'Format waktu kejadian tidak valid.',
-            'waktu_kejadian.before_or_equal' => 'Waktu kejadian tidak boleh di masa depan.',
+            'insiden_pada.date' => 'Format waktu kejadian tidak valid.',
+            'insiden_pada.before_or_equal' => 'Waktu kejadian tidak boleh di masa depan.',
             'deskripsi.required' => 'Uraian laporan wajib diisi.',
-            'deskripsi.min' => 'Uraian laporan minimal 10 karakter.',
-            'deskripsi.max' => 'Uraian laporan maksimal 3000 karakter.',
-            'catatan_revisi.max' => 'Catatan perbaikan maksimal 1000 karakter.',
+            'deskripsi.min' => 'Uraian laporan minimal 20 karakter.',
+            'deskripsi.max' => 'Uraian laporan maksimal 2000 karakter.',
+            'alasan_revisi.max' => 'Catatan perbaikan maksimal 1000 karakter.',
             'foto.max' => 'Jumlah foto maksimal '.self::MAKSIMAL_FOTO.' berkas.',
             'foto.*.image' => 'Setiap lampiran harus berupa berkas gambar.',
             'foto.*.mimes' => 'Format foto harus JPG, JPEG, PNG, atau WEBP.',
