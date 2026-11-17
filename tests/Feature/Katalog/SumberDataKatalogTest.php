@@ -90,7 +90,10 @@ class SumberDataKatalogTest extends TestCase
         $this->get(route('katalog.sumber-data.show', $baru))
             ->assertOk()
             ->assertSee('Dataset Baru')
-            ->assertSee('Dibuat');
+            ->assertSee('Dibuat')
+            ->assertSee('Nama sumber')
+            ->assertSee('Jenis sumber')
+            ->assertDontSee('nama_sumber');
     }
 
     public function test_halaman_katalog_memakai_layout_global_admin(): void

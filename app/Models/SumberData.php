@@ -63,6 +63,7 @@ class SumberData extends Model
      */
     public const LABEL_FIELD = [
         'nama_sumber' => 'Nama sumber',
+        'jenis_sumber' => 'Jenis sumber',
         'nama_penyedia' => 'Nama penyedia',
         'nama_lisensi' => 'Nama lisensi',
         'format_data' => 'Format data',
@@ -71,7 +72,9 @@ class SumberData extends Model
         'url_sumber' => 'URL sumber',
         'deskripsi_cakupan' => 'Deskripsi cakupan',
         'periode_mulai' => 'Periode mulai',
+        'periode_selesai' => 'Periode selesai',
         'interval_penyegaran_jam' => 'Interval penyegaran',
+        'is_aktif' => 'Status aktif',
     ];
 
     protected $table = 'sumber_data';

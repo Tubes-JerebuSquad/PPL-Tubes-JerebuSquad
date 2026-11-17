@@ -127,7 +127,7 @@
                                     <ul class="mt-2 space-y-1 text-xs text-ink-500">
                                         @foreach ($riwayat->perubahan as $field => $nilai)
                                             <li>
-                                                <span class="font-medium text-ink-700">{{ $field }}</span>:
+                                                <span class="font-medium text-ink-700">{{ \App\Models\SumberData::LABEL_FIELD[$field] ?? $field }}</span>:
                                                 {{ is_array($nilai) ? ($nilai['lama'] ?? '-') : $nilai }}
                                                 &rarr;
                                                 {{ is_array($nilai) ? ($nilai['baru'] ?? '-') : $nilai }}

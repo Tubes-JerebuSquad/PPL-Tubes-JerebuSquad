@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Katalog;
 
 use App\Enums\StatusKualitas;
+use App\Models\Pengguna;
 use App\Models\SumberData;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -15,11 +16,13 @@ class SimpanSumberDataRequest extends FormRequest
     private const POLA_KREDENSIAL_URL = '/^[a-z][a-z0-9+.\-]*:\/\/[^\/?#@]*@/i';
 
     /**
-     * Otorisasi katalog memakai Policy yang menyusul bersama fitur autentikasi.
+     * Pastikan hanya Admin aktif yang dapat menyimpan atau memperbarui katalog.
      */
     public function authorize(): bool
     {
-        return true;
+        $pengguna = $this->user();
+
+        return $pengguna instanceof Pengguna && $pengguna->isAktif() && $pengguna->isAdmin();
     }
 
     /**
