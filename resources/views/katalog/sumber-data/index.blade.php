@@ -111,9 +111,14 @@
                                 <p class="mt-0.5 text-xs text-ink-400">{{ $sumber->nama_penyedia }}</p>
                             </div>
 
-                            <a href="{{ route('katalog.sumber-data.edit', $sumber) }}" class="shrink-0 text-sm font-semibold text-rimba-600 hover:text-rimba-700">
-                                Ubah
-                            </a>
+                            <div class="flex shrink-0 items-center gap-3">
+                                <a href="{{ route('katalog.sumber-data.show', $sumber) }}" class="text-sm font-semibold text-ink-700 hover:text-rimba-600">
+                                    Detail
+                                </a>
+                                <a href="{{ route('katalog.sumber-data.edit', $sumber) }}" class="text-sm font-semibold text-rimba-600 hover:text-rimba-700">
+                                    Ubah
+                                </a>
+                            </div>
                         </div>
 
                         <div class="mt-3">
@@ -166,9 +171,14 @@
                                     @include('katalog.sumber-data._badges', ['sumber' => $sumber])
                                 </td>
                                 <td class="px-4 py-4 text-right">
-                                    <a href="{{ route('katalog.sumber-data.edit', $sumber) }}" class="text-sm font-semibold text-rimba-600 hover:text-rimba-700">
-                                        Ubah
-                                    </a>
+                                    <div class="flex justify-end gap-3">
+                                        <a href="{{ route('katalog.sumber-data.show', $sumber) }}" class="text-sm font-semibold text-ink-700 hover:text-rimba-600">
+                                            Detail
+                                        </a>
+                                        <a href="{{ route('katalog.sumber-data.edit', $sumber) }}" class="text-sm font-semibold text-rimba-600 hover:text-rimba-700">
+                                            Ubah
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach

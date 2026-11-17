@@ -30,6 +30,8 @@ class SumberDataKatalogTest extends TestCase
         $this->get(route('katalog.sumber-data.index', ['cari' => 'hotspot']))
             ->assertOk()
             ->assertSee('Hotspot NASA FIRMS')
+            ->assertSee('Detail')
+            ->assertSee('Ubah')
             ->assertDontSee('Batas Kawasan Lindung');
 
         $this->get(route('katalog.sumber-data.index', ['cari' => 'tidak-ada']))

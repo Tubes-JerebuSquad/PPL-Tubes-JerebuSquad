@@ -34,7 +34,7 @@ class SumberDataController extends Controller
         $sumberData = SumberData::query()
             ->when(
                 $cari !== null && $cari !== '',
-                fn (Builder $query) => $query->where('nama_sumber', 'ilike', '%'.$cari.'%'),
+                fn (Builder $query) => $query->whereLike('nama_sumber', '%'.$cari.'%'),
             )
             ->when($jenis !== null, fn (Builder $query) => $query->where('jenis_sumber', $jenis))
             ->when($status !== null, fn (Builder $query) => $query->where('is_aktif', $status === '1'))
