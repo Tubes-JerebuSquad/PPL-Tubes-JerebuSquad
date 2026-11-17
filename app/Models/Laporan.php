@@ -23,6 +23,12 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'insiden_pada',
     'status_laporan',
     'diserahkan_pada',
+    'kategori_triase',
+    'prioritas_triase',
+    'catatan_publik',
+    'catatan_internal',
+    'ditriase_oleh',
+    'ditriase_pada',
 ])]
 class Laporan extends Model
 {
@@ -47,6 +53,54 @@ class Laporan extends Model
 
     public const STATUS_SELESAI = 'SELESAI';
 
+    // ── Konstanta FR-10: Triase ──────────────────────────────────────
+
+    /** Alias singkat untuk status menunggu verifikasi (dipakai di FR-10). */
+    public const STATUS_MENUNGGU = self::STATUS_MENUNGGU_VERIFIKASI;
+
+    public const STATUS_PERLU_PERBAIKAN = 'DIKEMBALIKAN';
+
+    public const STATUS_DITERIMA_INSPEKSI = self::STATUS_DIVERIFIKASI;
+
+    public const LABEL_STATUS = [
+        self::STATUS_MENUNGGU_VERIFIKASI => 'Menunggu verifikasi',
+        self::STATUS_DIKEMBALIKAN        => 'Perlu perbaikan',
+        self::STATUS_DIVERIFIKASI        => 'Diterima untuk inspeksi',
+        self::STATUS_DITOLAK             => 'Ditolak',
+    ];
+
+    public const TINDAKAN_TERIMA = 'terima';
+
+    public const TINDAKAN_MINTA_PERBAIKAN = 'minta_perbaikan';
+
+    public const TINDAKAN_TOLAK = 'tolak';
+
+    /** Tindakan => status baru laporan. */
+    public const STATUS_HASIL_TINDAKAN = [
+        self::TINDAKAN_TERIMA           => self::STATUS_DIVERIFIKASI,
+        self::TINDAKAN_MINTA_PERBAIKAN  => self::STATUS_DIKEMBALIKAN,
+        self::TINDAKAN_TOLAK            => self::STATUS_DITOLAK,
+    ];
+
+    /** Tindakan yang mewajibkan alasan (catatan_publik). */
+    public const TINDAKAN_WAJIB_ALASAN = [
+        self::TINDAKAN_MINTA_PERBAIKAN,
+        self::TINDAKAN_TOLAK,
+    ];
+
+    public const KATEGORI_TRIASE = [
+        'deforestasi'       => 'Indikasi deforestasi',
+        'kebakaran'         => 'Indikasi kebakaran',
+        'alih_fungsi_lahan' => 'Alih fungsi lahan',
+        'lainnya'           => 'Lainnya',
+    ];
+
+    public const PRIORITAS_TRIASE = [
+        'rendah' => 'Rendah',
+        'sedang' => 'Sedang',
+        'tinggi' => 'Tinggi',
+    ];
+
     protected $table = 'laporan';
 
     protected $primaryKey = 'laporan_id';
@@ -64,10 +118,11 @@ class Laporan extends Model
     protected function casts(): array
     {
         return [
-            'insiden_pada' => 'datetime',
+            'insiden_pada'   => 'datetime',
             'diserahkan_pada' => 'datetime',
-            'dibuat_pada' => 'datetime',
+            'dibuat_pada'    => 'datetime',
             'diperbarui_pada' => 'datetime',
+            'ditriase_pada'  => 'datetime',
         ];
     }
 
@@ -111,6 +166,16 @@ class Laporan extends Model
     public function kawasan(): BelongsTo
     {
         return $this->belongsTo(Kawasan::class, 'kawasan_id', 'kawasan_id');
+    }
+
+    /**
+     * Pengawas yang melakukan triase laporan ini.
+     *
+     * @return BelongsTo<Pengguna, $this>
+     */
+    public function penriase(): BelongsTo
+    {
+        return $this->belongsTo(Pengguna::class, 'ditriase_oleh', 'pengguna_id');
     }
 
     /**
@@ -212,5 +277,38 @@ class Laporan extends Model
             (int) $this->laporan_id,
             $this->getAttribute('lokasi'),
         );
+    }
+
+    /**
+     * Apakah laporan masih dapat ditriase (hanya saat menunggu verifikasi).
+     */
+    public function bisaDitriase(): bool
+    {
+        return strtoupper((string) $this->status_laporan) === self::STATUS_MENUNGGU_VERIFIKASI;
+    }
+
+    /**
+     * Scope: filter berdasarkan status_laporan.
+     */
+    public function scopeBerstatus(\Illuminate\Database\Eloquent\Builder $query, ?string $status): void
+    {
+        if (filled($status)) {
+            $query->where('status_laporan', strtoupper($status));
+        }
+    }
+
+    /**
+     * Scope: cari berdasarkan kode_laporan atau deskripsi.
+     */
+    public function scopeCari(\Illuminate\Database\Eloquent\Builder $query, ?string $kata): void
+    {
+        if (blank($kata)) {
+            return;
+        }
+
+        $query->where(function (\Illuminate\Database\Eloquent\Builder $q) use ($kata): void {
+            $q->whereLike('kode_laporan', "%{$kata}%")
+                ->orWhereLike('deskripsi', "%{$kata}%");
+        });
     }
 }

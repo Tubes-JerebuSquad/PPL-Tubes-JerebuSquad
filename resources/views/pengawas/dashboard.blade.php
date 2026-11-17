@@ -14,7 +14,7 @@
                     Portal Pengawas RimbaWatch
                 </span>
                 <h1 class="text-2xl font-bold tracking-tight text-ink-900">
-                    Selamat Datang, {{ auth()->user()->nama_lengkap }}!
+                    Selamat Datang, {{ auth()->user()?->nama_lengkap ?? ($pengawas?->nama_lengkap ?? 'Pengawas') }}!
                 </h1>
                 <p class="mt-1 text-sm text-ink-500">
                     Anda masuk dengan peran <strong class="text-rimba-700">Pengawas</strong>. Verifikasi laporan masyarakat, tetapkan surat tugas untuk petugas lapangan, dan pantau status kelestarian kawasan.
@@ -87,7 +87,7 @@
                 Tindakan Cepat Pengawas
             </h2>
             <div class="space-y-3">
-                <a href="#" class="block p-3 rounded-xl border border-line hover:border-rimba-500 hover:bg-rimba-50/50 transition">
+                <a href="{{ route('pengawas.laporan.index') }}" class="block p-3 rounded-xl border border-line hover:border-rimba-500 hover:bg-rimba-50/50 transition">
                     <span class="font-semibold text-sm text-ink-900 block">Verifikasi Aduan Warga</span>
                     <span class="text-xs text-ink-500 block mt-0.5">Periksa bukti foto dan kesesuaian koordinat laporan</span>
                 </a>
@@ -123,12 +123,14 @@
                         <tbody class="divide-y divide-line">
                             @foreach ($laporanTerbaru as $lap)
                                 <tr class="hover:bg-rimba-50/40">
-                                    <td class="py-3 px-3 font-mono text-xs text-ink-500">#{{ $lap->nomor_laporan ?? $lap->id }}</td>
-                                    <td class="py-3 px-3 font-medium text-ink-900">{{ $lap->kategori ?? 'Laporan Lingkungan' }}</td>
+                                    <td class="py-3 px-3 font-mono text-xs text-ink-500">
+                                        <a href="{{ route('pengawas.laporan.show', $lap->laporan_id ?? $lap) }}" class="font-semibold text-rimba-700 hover:underline">
+                                            {{ $lap->kode_laporan ?? ($lap->laporan_id ?? '-') }}
+                                        </a>
+                                    </td>
+                                    <td class="py-3 px-3 font-medium text-ink-900">{{ ucfirst(str_replace('_', ' ', $lap->kategori ?? 'Laporan Lingkungan')) }}</td>
                                     <td class="py-3 px-3">
-                                        <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                                            {{ strtoupper($lap->status_laporan ?? 'MENUNGGU') }}
-                                        </span>
+                                        <x-ui.status-laporan :status="$lap->status_laporan ?? 'MENUNGGU_VERIFIKASI'" />
                                     </td>
                                     <td class="py-3 px-3 text-xs text-ink-400">{{ $lap->dibuat_pada ?? '-' }}</td>
                                 </tr>

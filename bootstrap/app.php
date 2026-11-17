@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\HanyaAdmin;
 use App\Http\Middleware\HanyaMasyarakat;
+use App\Http\Middleware\HanyaPengawas;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,8 +16,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'admin' => HanyaAdmin::class,
+            'admin'     => HanyaAdmin::class,
             'masyarakat' => HanyaMasyarakat::class,
+            'pengawas'  => HanyaPengawas::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

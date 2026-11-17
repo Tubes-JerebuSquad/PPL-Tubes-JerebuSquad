@@ -23,6 +23,20 @@ class PeristiwaLaporan extends Model
     /** @use HasFactory<PeristiwaLaporanFactory> */
     use HasFactory;
 
+    // ── Jenis peristiwa FR-10 ────────────────────────────────────────
+    public const JENIS_DITERIMA            = 'TRIASE_DITERIMA';
+
+    public const JENIS_PERBAIKAN_DIMINTA   = 'PERBAIKAN_DIMINTA';
+
+    public const JENIS_DITOLAK             = 'LAPORAN_DITOLAK';
+
+    /** Tindakan triase => jenis peristiwa. */
+    public const JENIS_HASIL_TINDAKAN = [
+        Laporan::TINDAKAN_TERIMA           => self::JENIS_DITERIMA,
+        Laporan::TINDAKAN_MINTA_PERBAIKAN  => self::JENIS_PERBAIKAN_DIMINTA,
+        Laporan::TINDAKAN_TOLAK            => self::JENIS_DITOLAK,
+    ];
+
     protected $table = 'peristiwa_laporan';
 
     protected $primaryKey = 'peristiwa_id';

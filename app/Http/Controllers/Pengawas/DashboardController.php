@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Pengawas;
 
 use App\Http\Controllers\Controller;
+use App\Models\Laporan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -23,10 +24,10 @@ class DashboardController extends Controller
 
         $totalLaporan = Schema::hasTable('laporan') ? DB::table('laporan')->count() : 0;
         
-        $laporanPerluVerifikasi = Schema::hasTable('laporan') 
+        $laporanPerluVerifikasi = Schema::hasTable('laporan')
             ? DB::table('laporan')
-                ->whereIn('status_laporan', ['menunggu_verifikasi', 'MENUNGGU_VERIFIKASI'])
-                ->count() 
+                ->where('status_laporan', Laporan::STATUS_MENUNGGU_VERIFIKASI)
+                ->count()
             : 0;
 
         $tugasInspeksi = Schema::hasTable('tugas_inspeksi') ? DB::table('tugas_inspeksi')->count() : 0;

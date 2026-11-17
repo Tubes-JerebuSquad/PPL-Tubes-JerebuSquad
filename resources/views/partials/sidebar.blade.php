@@ -46,9 +46,9 @@
             ],
             [
                 'label' => 'Verifikasi Laporan',
-                'route' => null,
-                'pola' => null,
-                'ikon' => 'database',
+                'route' => 'pengawas.laporan.index',
+                'pola'  => 'pengawas.laporan.*',
+                'ikon'  => 'database',
             ],
             [
                 'label' => 'Penugasan Lapangan',
