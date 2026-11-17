@@ -109,7 +109,7 @@
                             <option value="">Tidak ditentukan</option>
                             @foreach ($daftarKawasan as $kawasan)
                                 <option value="{{ $kawasan->kawasan_id }}" @selected((int) old('kawasan_id', $laporan->kawasan_id) === (int) $kawasan->kawasan_id)>
-                                    {{ $kawasan->nama_kawasan }}
+                                    {{ $kawasan->nama_kawasan }}{{ $kawasan->wilayah ? ' — '.$kawasan->wilayah->nama_wilayah : '' }}
                                 </option>
                             @endforeach
                         </select>

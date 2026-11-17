@@ -26,6 +26,15 @@ class PerbaikiLaporanRequest extends FormRequest
             && $laporan->bolehDiperbaiki();
     }
 
+    protected function prepareForValidation(): void
+    {
+        if (is_string($this->input('kategori'))) {
+            $this->merge([
+                'kategori' => strtolower(trim($this->input('kategori'))),
+            ]);
+        }
+    }
+
     /**
      * @return array<string, array<int, mixed>>
      */

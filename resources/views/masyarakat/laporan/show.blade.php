@@ -108,6 +108,7 @@
                                     <img
                                         src="{{ route('masyarakat.laporan.media', [$laporan, $foto]) }}"
                                         alt="{{ $foto->nama_asli }}"
+                                        loading="lazy"
                                         class="h-28 w-full object-cover transition group-hover:scale-105"
                                     >
                                     <p class="truncate px-2.5 py-1.5 text-xs text-ink-500">{{ $foto->nama_asli }}</p>

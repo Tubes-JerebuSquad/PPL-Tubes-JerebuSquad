@@ -151,4 +151,21 @@ class LaporanPelacakanTest extends TestCase
             ->assertSee('sudah terkunci dalam tahap pemeriksaan')
             ->assertDontSee(route('masyarakat.laporan.edit', $laporan), false);
     }
+
+    public function test_dashboard_masyarakat_menampilkan_tautan_ke_pelacakan_dan_perbaikan_laporan(): void
+    {
+        $laporan = Laporan::factory()->perluPerbaikan()->create([
+            'pelapor_id' => $this->pelapor->pengguna_id,
+            'nomor_laporan' => 'RW-DASH-01',
+        ]);
+
+        $this->actingAs($this->pelapor)
+            ->get(route('masyarakat.dashboard'))
+            ->assertOk()
+            ->assertSee(route('masyarakat.laporan.index'), false)
+            ->assertSee(route('masyarakat.laporan.show', $laporan), false)
+            ->assertSee(route('masyarakat.laporan.edit', $laporan), false)
+            ->assertSee('RW-DASH-01')
+            ->assertSee('Perlu Perbaikan');
+    }
 }

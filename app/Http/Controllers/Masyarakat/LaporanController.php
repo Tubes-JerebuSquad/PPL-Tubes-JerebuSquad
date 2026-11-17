@@ -85,7 +85,7 @@ class LaporanController extends Controller
             'laporan' => $laporan,
             'daftarKategori' => KategoriLaporan::pilihan(),
             'daftarWilayah' => Wilayah::query()->aktif()->orderBy('nama_wilayah')->get(),
-            'daftarKawasan' => Kawasan::query()->aktif()->orderBy('nama_kawasan')->get(),
+            'daftarKawasan' => Kawasan::query()->with('wilayah')->aktif()->orderBy('nama_kawasan')->get(),
         ]);
     }
 
