@@ -117,9 +117,12 @@
 
         <!-- Tabel Riwayat Aduan Saya -->
         <div class="rounded-2xl border border-line bg-white p-6 shadow-sm lg:col-span-2">
-            <h2 class="text-base font-bold text-ink-900 mb-4 flex items-center justify-between">
+            <h2 class="text-base font-bold text-ink-900 mb-4 flex items-center justify-between gap-2">
                 <span>Riwayat Laporan Aduan Saya</span>
-                <span class="text-xs font-semibold text-ink-400">Total: {{ count($riwayatLaporan) }} riwayat</span>
+                <span class="flex items-center gap-3 text-xs font-semibold">
+                    <span class="text-ink-400">Total: {{ count($riwayatLaporan) }} riwayat</span>
+                    <a href="{{ route('masyarakat.laporan.index') }}" class="text-rimba-600 hover:text-rimba-700 hover:underline">Lihat semua</a>
+                </span>
             </h2>
 
             @if (count($riwayatLaporan) > 0)
@@ -136,7 +139,11 @@
                         <tbody class="divide-y divide-line">
                             @foreach ($riwayatLaporan as $item)
                                 <tr class="hover:bg-rimba-50/40">
-                                    <td class="py-3 px-3 font-mono text-xs text-ink-500">#{{ $item->nomor_laporan ?? $item->id }}</td>
+                                    <td class="py-3 px-3 font-mono text-xs">
+                                        <a href="{{ route('masyarakat.laporan.show', $item->id) }}" class="font-semibold text-rimba-600 hover:underline">
+                                            #{{ $item->nomor_laporan ?? $item->id }}
+                                        </a>
+                                    </td>
                                     <td class="py-3 px-3 font-medium text-ink-900">{{ $item->kategori ?? 'Laporan Lingkungan' }}</td>
                                     <td class="py-3 px-3">
                                         <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold bg-rimba-100 text-rimba-700">

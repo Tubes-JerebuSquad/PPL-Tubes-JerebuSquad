@@ -100,8 +100,8 @@
             ],
             [
                 'label' => 'Laporan Saya',
-                'route' => null,
-                'pola' => null,
+                'route' => 'masyarakat.laporan.index',
+                'pola' => 'masyarakat.laporan.*',
                 'ikon' => 'database',
             ],
             [
