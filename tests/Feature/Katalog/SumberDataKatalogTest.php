@@ -3,6 +3,7 @@
 namespace Tests\Feature\Katalog;
 
 use App\Enums\StatusKualitas;
+use App\Models\Pengguna;
 use App\Models\SumberData;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -10,6 +11,16 @@ use Tests\TestCase;
 class SumberDataKatalogTest extends TestCase
 {
     use RefreshDatabase;
+
+    private Pengguna $admin;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->admin = Pengguna::factory()->admin()->create();
+        $this->actingAs($this->admin);
+    }
 
     public function test_pencarian_nama_tidak_peka_huruf_besar_kecil(): void
     {
@@ -84,6 +95,8 @@ class SumberDataKatalogTest extends TestCase
 
     public function test_halaman_katalog_memakai_layout_global_admin(): void
     {
+        $this->admin->update(['nama_lengkap' => 'Admin RimbaWatch']);
+
         $this->get(route('katalog.sumber-data.index'))
             ->assertOk()
             ->assertSee('PBI-03 · Admin')

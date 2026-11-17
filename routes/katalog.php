@@ -3,7 +3,7 @@
 use App\Http\Controllers\Katalog\SumberDataController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('katalog')->name('katalog.')->group(function (): void {
+Route::middleware(['auth', 'admin'])->prefix('katalog')->name('katalog.')->group(function (): void {
     Route::resource('sumber-data', SumberDataController::class)
         ->parameters(['sumber-data' => 'sumberData'])
         ->except(['destroy']);

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Katalog;
 
+use App\Models\Pengguna;
 use App\Models\SumberData;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -9,6 +10,13 @@ use Tests\TestCase;
 class SumberDataValidasiTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->actingAs(Pengguna::factory()->admin()->create());
+    }
 
     /**
      * @param  array<string, mixed>  $ganti
