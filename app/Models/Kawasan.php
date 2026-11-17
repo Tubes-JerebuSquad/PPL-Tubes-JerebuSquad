@@ -39,7 +39,14 @@ class Kawasan extends Model
     {
         return [
             'is_aktif' => 'boolean',
+            'dibuat_pada' => 'datetime',
+            'diperbarui_pada' => 'datetime',
         ];
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'kawasan_id';
     }
 
     /**
@@ -48,6 +55,14 @@ class Kawasan extends Model
     public function wilayah(): BelongsTo
     {
         return $this->belongsTo(Wilayah::class, 'wilayah_id', 'wilayah_id');
+    }
+
+    /**
+     * @return BelongsTo<Pengguna, $this>
+     */
+    public function pembuat(): BelongsTo
+    {
+        return $this->belongsTo(Pengguna::class, 'dibuat_oleh', 'pengguna_id');
     }
 
     public function scopeAktif(Builder $query): Builder

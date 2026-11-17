@@ -37,6 +37,8 @@ class Wilayah extends Model
     {
         return [
             'is_aktif' => 'boolean',
+            'dibuat_pada' => 'datetime',
+            'diperbarui_pada' => 'datetime',
         ];
     }
 
