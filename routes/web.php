@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Auth\DaftarController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\DashboardController;
@@ -15,6 +16,10 @@ Route::post('/', [LoginController::class, 'store']);
 
 Route::get('/login', [LoginController::class, 'create'])->name('login');
 Route::post('/login', [LoginController::class, 'store']);
+Route::middleware('guest')->group(function () {
+    Route::get('/register', [DaftarController::class, 'create'])->name('register');
+    Route::post('/register', [DaftarController::class, 'store'])->middleware('throttle:5,1');
+});
 
 // Rute yang membutuhkan autentikasi
 Route::middleware('auth')->group(function () {

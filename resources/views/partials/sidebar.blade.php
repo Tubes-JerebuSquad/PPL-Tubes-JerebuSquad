@@ -13,8 +13,8 @@
             ],
             [
                 'label' => 'Data Kawasan',
-                'route' => null,
-                'pola' => null,
+                'route' => 'admin.kawasan.index',
+                'pola' => 'admin.kawasan.*',
                 'ikon' => 'map',
             ],
             [
