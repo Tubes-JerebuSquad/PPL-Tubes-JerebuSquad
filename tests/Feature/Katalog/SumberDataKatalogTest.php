@@ -425,8 +425,8 @@ class SumberDataKatalogTest extends TestCase
         $this->seed(SumberDataSeeder::class);
         $this->seed(SumberDataSeeder::class);
 
-        $this->assertSame(5, SumberData::query()->count());
-        $this->assertSame(4, SumberData::query()->aktif()->count());
+        $this->assertSame(4, SumberData::query()->count());
+        $this->assertSame(3, SumberData::query()->aktif()->count());
         $this->assertSame(1, SumberData::query()->nonaktif()->count());
     }
 

@@ -60,23 +60,6 @@ class SumberDataSeeder extends Seeder
             [
                 'aktifkan' => true,
                 'data' => [
-                    'nama_sumber' => 'Kawasan Hutan Indonesia (GFW Open Data)',
-                    'jenis_sumber' => SumberData::JENIS_EKSTERNAL,
-                    'nama_penyedia' => 'Global Forest Watch / KLHK',
-                    'url_sumber' => 'https://data.globalforestwatch.org/',
-                    'nama_lisensi' => 'CC BY 4.0',
-                    'format_data' => 'GEOJSON',
-                    'deskripsi_cakupan' => '[Data Demo] Referensi batas kawasan hutan legal Indonesia dari portal open data GFW.',
-                    'periode_mulai' => '2024-01-01',
-                    'periode_selesai' => '2026-12-31',
-                    'kode_crs' => 'EPSG:4326',
-                    'interval_penyegaran_jam' => 720,
-                    'status_kualitas' => StatusKualitas::VERIFIED->value,
-                ],
-            ],
-            [
-                'aktifkan' => true,
-                'data' => [
                     'nama_sumber' => 'Batas Kawasan Hutan Lindung (Demo)',
                     'jenis_sumber' => SumberData::JENIS_INTERNAL,
                     'nama_penyedia' => 'Tim GIS RimbaWatch',
