@@ -429,4 +429,22 @@ class SumberDataKatalogTest extends TestCase
         $this->assertSame(4, SumberData::query()->aktif()->count());
         $this->assertSame(1, SumberData::query()->nonaktif()->count());
     }
+
+    public function test_edit_dataset_aktif_menampilkan_banner_error_dengan_label_ramah(): void
+    {
+        $sumber = SumberData::factory()->aktif()->create([
+            'jenis_sumber' => SumberData::JENIS_EKSTERNAL,
+            'interval_penyegaran_jam' => 24,
+        ]);
+
+        $this->from(route('katalog.sumber-data.edit', $sumber))
+            ->followingRedirects()
+            ->put(route('katalog.sumber-data.update', $sumber), [
+                'interval_penyegaran_jam' => null,
+            ])
+            ->assertOk()
+            ->assertSee('Metadata belum lengkap: Interval penyegaran.')
+            ->assertDontSee('interval_penyegaran_jam-error')
+            ->assertDontSee('Metadata belum lengkap: interval_penyegaran_jam');
+    }
 }

@@ -4,7 +4,7 @@
     </x-ui.badge>
 
     <x-ui.badge :variant="$sumber->jenis_sumber === \App\Models\SumberData::JENIS_INTERNAL ? 'info' : 'neutral'">
-        {{ ucfirst(strtolower($sumber->jenis_sumber)) }}
+        {{ $sumber->jenis_sumber ? ucfirst(strtolower($sumber->jenis_sumber)) : 'Belum ditentukan' }}
     </x-ui.badge>
 
     <x-ui.badge :variant="$sumber->status_kualitas?->variant() ?? 'neutral'">

@@ -30,7 +30,7 @@
                         {{ $sumberData->is_aktif ? 'Aktif' : 'Nonaktif' }}
                     </x-ui.badge>
                     <x-ui.badge :variant="$sumberData->jenis_sumber === \App\Models\SumberData::JENIS_INTERNAL ? 'info' : 'neutral'">
-                        {{ ucfirst(strtolower($sumberData->jenis_sumber)) }}
+                        {{ $sumberData->jenis_sumber ? ucfirst(strtolower($sumberData->jenis_sumber)) : 'Belum ditentukan' }}
                     </x-ui.badge>
                     <x-ui.badge :variant="$sumberData->status_kualitas?->variant() ?? 'neutral'">
                         {{ $sumberData->status_kualitas?->label() ?? 'Belum diketahui' }}
