@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 #[Fillable([
     'nama_sumber',
@@ -128,6 +130,24 @@ class SumberData extends Model
         return $this->belongsTo(Pengguna::class, 'dibuat_oleh', 'pengguna_id');
     }
 
+    /**
+     * @return HasMany<Kawasan, $this>
+     */
+    public function kawasan(): HasMany
+    {
+        return $this->hasMany(Kawasan::class, 'sumber_id', 'sumber_id')
+            ->orderBy('kawasan.nama_kawasan');
+    }
+
+    /**
+     * @return HasMany<BatasKawasan, $this>
+     */
+    public function batasKawasan(): HasMany
+    {
+        return $this->hasMany(BatasKawasan::class, 'sumber_id', 'sumber_id')
+            ->orderByDesc('batas_kawasan.dibuat_pada');
+    }
+
     public function scopeAktif(Builder $query): Builder
     {
         return $query->where('is_aktif', true);
@@ -136,6 +156,23 @@ class SumberData extends Model
     public function scopeNonaktif(Builder $query): Builder
     {
         return $query->where('is_aktif', false);
+    }
+
+    /**
+     * Sumber data aktif untuk pilihan dropdown modul lain, tetap menyertakan
+     * sumber yang sedang terpakai meski statusnya sudah dinonaktifkan.
+     */
+    public function scopeTersediaUntukPilihan(Builder $query, ?int $termasukSumberId = null): Builder
+    {
+        return $query
+            ->where(function (Builder $sub) use ($termasukSumberId): void {
+                $sub->where('is_aktif', true)
+                    ->when(
+                        $termasukSumberId !== null,
+                        fn (Builder $q) => $q->orWhere('sumber_id', $termasukSumberId),
+                    );
+            })
+            ->orderBy('nama_sumber');
     }
 
     /**
@@ -186,5 +223,37 @@ class SumberData extends Model
     public function belumPernahDiambil(): bool
     {
         return $this->terakhir_diambil_pada === null;
+    }
+
+    /**
+     * Ringkasan atribusi sumber data untuk ditampilkan pada modul kawasan, batas, atau peta.
+     */
+    public function ringkasanAtribusi(): string
+    {
+        return sprintf(
+            '%s — %s (%s · %s)',
+            $this->nama_sumber,
+            $this->nama_penyedia,
+            $this->nama_lisensi,
+            $this->kode_crs,
+        );
+    }
+
+    /**
+     * Hitung jumlah rekaman modul lain yang merujuk ke sumber data ini.
+     *
+     * @return array{kawasan: int, batas_kawasan: int, titik_panas: int, log_sinkronisasi: int}
+     */
+    public function ringkasanPenggunaan(): array
+    {
+        $hasil = [];
+
+        foreach (['kawasan', 'batas_kawasan', 'titik_panas', 'log_sinkronisasi'] as $tabel) {
+            $hasil[$tabel] = Schema::hasTable($tabel)
+                ? DB::table($tabel)->where('sumber_id', $this->sumber_id)->count()
+                : 0;
+        }
+
+        return $hasil;
     }
 }

@@ -3,9 +3,12 @@
 namespace Tests\Feature\Katalog;
 
 use App\Enums\StatusKualitas;
+use App\Models\Kawasan;
 use App\Models\Pengguna;
 use App\Models\SumberData;
+use App\Models\Wilayah;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class SumberDataKatalogTest extends TestCase
@@ -292,5 +295,86 @@ class SumberDataKatalogTest extends TestCase
         $this->assertSame(15, $paginator->perPage());
         $this->assertStringContainsString('cari=Dataset', $paginator->url(2));
         $this->assertStringContainsString('jenis_sumber=INTERNAL', $paginator->url(2));
+    }
+
+    public function test_scope_tersedia_untuk_pilihan_dan_ringkasan_atribusi(): void
+    {
+        $aktif = SumberData::factory()->aktif()->create([
+            'nama_sumber' => 'Sumber Aktif A',
+            'nama_penyedia' => 'KLHK',
+            'nama_lisensi' => 'CC BY 4.0',
+            'kode_crs' => 'EPSG:4326',
+        ]);
+        $nonaktif = SumberData::factory()->nonaktif()->create(['nama_sumber' => 'Sumber Nonaktif B']);
+
+        $pilihanAktif = SumberData::query()->tersediaUntukPilihan()->pluck('sumber_id')->all();
+        $this->assertSame([$aktif->sumber_id], $pilihanAktif);
+
+        $pilihanDenganEksisting = SumberData::query()
+            ->tersediaUntukPilihan($nonaktif->sumber_id)
+            ->pluck('sumber_id')
+            ->all();
+        $this->assertEqualsCanonicalizing([$aktif->sumber_id, $nonaktif->sumber_id], $pilihanDenganEksisting);
+
+        $this->assertSame(
+            'Sumber Aktif A — KLHK (CC BY 4.0 · EPSG:4326)',
+            $aktif->ringkasanAtribusi(),
+        );
+    }
+
+    public function test_katalog_dan_detail_menampilkan_penggunaan_pada_kawasan_dan_batas(): void
+    {
+        $sumber = SumberData::factory()->aktif()->create(['nama_sumber' => 'Dataset Batas Provinsi']);
+        $wilayah = Wilayah::factory()->create(['nama_wilayah' => 'Riau', 'is_aktif' => true]);
+
+        $kawasan = Kawasan::create([
+            'wilayah_id' => $wilayah->wilayah_id,
+            'nama_kawasan' => 'Taman Nasional Tesso Nilo',
+            'jenis_kawasan' => 'TAMAN_NASIONAL',
+            'status_kawasan' => 'AKTIF',
+            'sumber_id' => $sumber->sumber_id,
+            'is_aktif' => true,
+            'dibuat_oleh' => $this->admin->pengguna_id,
+        ]);
+
+        DB::statement(
+            "INSERT INTO batas_kawasan (kawasan_id, nomor_versi, data_geometri, kode_crs, sumber_id, status_validasi, pesan_validasi, dibuat_oleh, dibuat_pada)
+             VALUES (?, ?, ST_Multi(ST_SetSRID(ST_GeomFromText('POLYGON((101.44 -0.50, 101.45 -0.50, 101.45 -0.51, 101.44 -0.51, 101.44 -0.50))'), 4326)), ?, ?, ?, ?, ?, NOW())",
+            [
+                $kawasan->kawasan_id,
+                1,
+                'EPSG:4326',
+                $sumber->sumber_id,
+                'VALID',
+                'Validasi uji integrasi',
+                $this->admin->pengguna_id,
+            ],
+        );
+
+        $this->get(route('katalog.sumber-data.index'))
+            ->assertOk()
+            ->assertSee('Dipakai 1 kawasan · 1 batas');
+
+        $this->get(route('katalog.sumber-data.show', $sumber))
+            ->assertOk()
+            ->assertSee('Penggunaan dataset')
+            ->assertSee('2 rujukan')
+            ->assertSee('Taman Nasional Tesso Nilo')
+            ->assertSee('Riau')
+            ->assertSee('Versi #1')
+            ->assertSee(route('admin.kawasan.show', $kawasan), false)
+            ->assertSee(route('admin.kawasan.batas.index', $kawasan->kawasan_id), false)
+            ->assertSee('Dataset ini sedang dirujuk oleh 2 rekaman modul lain.');
+    }
+
+    public function test_detail_menampilkan_status_kosong_bila_belum_dirujuk_modul_lain(): void
+    {
+        $sumber = SumberData::factory()->aktif()->create();
+
+        $this->get(route('katalog.sumber-data.show', $sumber))
+            ->assertOk()
+            ->assertSee('0 rujukan')
+            ->assertSee('Belum ada kawasan, batas kawasan, titik panas, atau log sinkronisasi yang merujuk dataset ini.')
+            ->assertDontSee('Dataset ini sedang dirujuk oleh');
     }
 }

@@ -4,7 +4,13 @@
 @section('breadcrumb', 'Sumber Data / Detail')
 
 @section('content')
-    @php($metadataKurang = $sumberData->labelMetadataBelumLengkap())
+    @php
+        $metadataKurang = $sumberData->labelMetadataBelumLengkap();
+        $ringkasanPenggunaan ??= ['kawasan' => 0, 'batas_kawasan' => 0, 'titik_panas' => 0, 'log_sinkronisasi' => 0];
+        $kawasanTerkait ??= collect();
+        $batasTerkait ??= collect();
+        $totalPenggunaan = array_sum($ringkasanPenggunaan);
+    @endphp
 
     <div class="mb-8">
         <a href="{{ route('katalog.sumber-data.index') }}" class="inline-flex items-center gap-1.5 text-sm font-medium text-ink-500 transition hover:text-rimba-600">
@@ -109,6 +115,94 @@
             </x-ui.card>
 
             <x-ui.card class="p-6">
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                        <h2 class="text-lg font-semibold text-ink-900">Penggunaan dataset</h2>
+                        <p class="mt-1 text-sm text-ink-400">Keterhubungan sumber data ini pada modul lain di RimbaWatch.</p>
+                    </div>
+                    <x-ui.badge :variant="$totalPenggunaan > 0 ? 'info' : 'neutral'">
+                        {{ $totalPenggunaan }} rujukan
+                    </x-ui.badge>
+                </div>
+
+                <dl class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    <div class="rounded-xl border border-line bg-rimba-50/50 p-3.5">
+                        <dt class="text-xs font-medium text-ink-400">Kawasan</dt>
+                        <dd class="mt-1 text-xl font-bold text-rimba-900">{{ $ringkasanPenggunaan['kawasan'] }}</dd>
+                    </div>
+                    <div class="rounded-xl border border-line bg-rimba-50/50 p-3.5">
+                        <dt class="text-xs font-medium text-ink-400">Versi batas</dt>
+                        <dd class="mt-1 text-xl font-bold text-rimba-900">{{ $ringkasanPenggunaan['batas_kawasan'] }}</dd>
+                    </div>
+                    <div class="rounded-xl border border-line bg-rimba-50/50 p-3.5">
+                        <dt class="text-xs font-medium text-ink-400">Titik panas</dt>
+                        <dd class="mt-1 text-xl font-bold text-rimba-900">{{ $ringkasanPenggunaan['titik_panas'] }}</dd>
+                    </div>
+                    <div class="rounded-xl border border-line bg-rimba-50/50 p-3.5">
+                        <dt class="text-xs font-medium text-ink-400">Log sinkronisasi</dt>
+                        <dd class="mt-1 text-xl font-bold text-rimba-900">{{ $ringkasanPenggunaan['log_sinkronisasi'] }}</dd>
+                    </div>
+                </dl>
+
+                @if ($kawasanTerkait->isNotEmpty())
+                    <div class="mt-6 border-t border-line pt-5">
+                        <h3 class="text-xs font-semibold uppercase tracking-[0.12em] text-ink-400">Kawasan yang merujuk</h3>
+                        <ul class="mt-3 divide-y divide-line rounded-xl border border-line">
+                            @foreach ($kawasanTerkait as $kawasan)
+                                <li class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm">
+                                    <div class="min-w-0">
+                                        <p class="font-medium text-ink-900">{{ $kawasan->nama_kawasan }}</p>
+                                        <p class="text-xs text-ink-400">{{ $kawasan->wilayah?->nama_wilayah ?? '-' }}</p>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <x-ui.badge :variant="$kawasan->is_aktif ? 'success' : 'danger'">
+                                            {{ $kawasan->is_aktif ? 'Aktif' : 'Nonaktif' }}
+                                        </x-ui.badge>
+                                        @if (\Illuminate\Support\Facades\Route::has('admin.kawasan.show'))
+                                            <a href="{{ route('admin.kawasan.show', $kawasan) }}" class="text-xs font-semibold text-rimba-600 hover:text-rimba-700 hover:underline">
+                                                Lihat kawasan
+                                            </a>
+                                        @endif
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                @if ($batasTerkait->isNotEmpty())
+                    <div class="mt-6 border-t border-line pt-5">
+                        <h3 class="text-xs font-semibold uppercase tracking-[0.12em] text-ink-400">Versi batas kawasan terbaru</h3>
+                        <ul class="mt-3 divide-y divide-line rounded-xl border border-line">
+                            @foreach ($batasTerkait as $batas)
+                                <li class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm">
+                                    <div class="min-w-0">
+                                        <p class="font-medium text-ink-900">
+                                            {{ $batas->nama_kawasan }} · Versi #{{ $batas->nomor_versi }}
+                                        </p>
+                                        <p class="text-xs text-ink-400">
+                                            Status validasi: {{ $batas->status_validasi }}
+                                        </p>
+                                    </div>
+                                    @if (\Illuminate\Support\Facades\Route::has('admin.kawasan.batas.index'))
+                                        <a href="{{ route('admin.kawasan.batas.index', $batas->kawasan_id) }}" class="text-xs font-semibold text-rimba-600 hover:text-rimba-700 hover:underline">
+                                            Lihat batas
+                                        </a>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                @if ($totalPenggunaan === 0)
+                    <p class="mt-4 text-sm text-ink-400">
+                        Belum ada kawasan, batas kawasan, titik panas, atau log sinkronisasi yang merujuk dataset ini.
+                    </p>
+                @endif
+            </x-ui.card>
+
+            <x-ui.card class="p-6">
                 <h2 class="text-lg font-semibold text-ink-900">Riwayat perubahan</h2>
                 <p class="mt-1 text-sm text-ink-400">Perubahan metadata tercatat dan tidak menimpa riwayat sebelumnya.</p>
 
@@ -157,6 +251,12 @@
                 </p>
 
                 @if ($sumberData->is_aktif)
+                    @if ($totalPenggunaan > 0)
+                        <div class="mt-4 rounded-xl border border-amber-ink/20 bg-amber-soft px-4 py-3 text-xs text-amber-ink" role="status">
+                            Dataset ini sedang dirujuk oleh {{ $totalPenggunaan }} rekaman modul lain. Penonaktifan tidak menghapus data tersimpan, tetapi menghentikan pemilihan baru pada modul terkait.
+                        </div>
+                    @endif
+
                     <form
                         method="POST"
                         action="{{ route('katalog.sumber-data.nonaktifkan', $sumberData) }}"
