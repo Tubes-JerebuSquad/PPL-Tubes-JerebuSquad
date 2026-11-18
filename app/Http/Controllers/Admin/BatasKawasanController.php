@@ -77,6 +77,39 @@ class BatasKawasanController extends Controller
         ]);
     }
 
+    public function geojsonAktif(int $kawasanId)
+    {
+        $batas = DB::selectOne("
+            SELECT
+                bk.batas_id,
+                bk.kawasan_id,
+                k.nama_kawasan,
+                k.jenis_kawasan,
+                bk.nomor_versi,
+                ST_AsGeoJSON(bk.data_geometri) AS geometry
+            FROM batas_kawasan bk
+            JOIN kawasan k ON k.kawasan_id = bk.kawasan_id
+            WHERE bk.kawasan_id = ?
+              AND bk.status_validasi = 'VALID'
+            ORDER BY bk.nomor_versi DESC
+            LIMIT 1
+        ", [$kawasanId]);
+
+        abort_if(!$batas, 404, 'Batas aktif kawasan belum tersedia.');
+
+        return response()->json([
+            'type' => 'Feature',
+            'properties' => [
+                'batas_id' => $batas->batas_id,
+                'kawasan_id' => $batas->kawasan_id,
+                'nama_kawasan' => $batas->nama_kawasan,
+                'jenis_kawasan' => $batas->jenis_kawasan,
+                'nomor_versi' => $batas->nomor_versi,
+            ],
+            'geometry' => json_decode($batas->geometry, true),
+        ]);
+    }
+
     public function simpanDigitasi(Request $request, int $kawasanId): RedirectResponse
     {
         $validated = $request->validate([

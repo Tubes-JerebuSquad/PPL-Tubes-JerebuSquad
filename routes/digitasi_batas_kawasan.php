@@ -11,3 +11,7 @@ Route::middleware(['auth', 'admin'])
         Route::post('/batas/digitasi', [BatasKawasanController::class, 'simpanDigitasi'])->name('digitasi');
         Route::post('/batas/impor', [BatasKawasanController::class, 'imporGeojson'])->name('impor');
     });
+
+Route::middleware(['auth'])
+    ->get('/api/kawasan/{kawasan}/batas-aktif', [BatasKawasanController::class, 'geojsonAktif'])
+    ->name('api.kawasan.batas-aktif');

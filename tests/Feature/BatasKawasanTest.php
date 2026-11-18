@@ -33,8 +33,18 @@ class BatasKawasanTest extends TestCase
             $this->seed(PeranSeeder::class);
         }
 
+        $kolomPeran = Schema::hasColumn('peran', 'kode_peran') ? 'kode_peran' : 'nama_peran';
+
+        $peranAdminId = DB::table('peran')
+            ->whereRaw("LOWER({$kolomPeran}) LIKE ?", ['%admin%'])
+            ->value('peran_id') ?? DB::table('peran')->max('peran_id');
+
+        $peranMasyarakatId = DB::table('peran')
+            ->whereRaw("LOWER({$kolomPeran}) LIKE ?", ['%masyarakat%'])
+            ->value('peran_id') ?? DB::table('peran')->min('peran_id');
+
         $adminId = DB::table('pengguna')->insertGetId([
-            'peran_id' => 4,
+            'peran_id' => $peranAdminId,
             'nama_lengkap' => 'Admin Test PBI02',
             'email' => 'admin.test.pbi02@rimbawatch.org',
             'password_hash' => Hash::make('password123'),
@@ -43,7 +53,7 @@ class BatasKawasanTest extends TestCase
         ], 'pengguna_id');
 
         $wargaId = DB::table('pengguna')->insertGetId([
-            'peran_id' => 1,
+            'peran_id' => $peranMasyarakatId,
             'nama_lengkap' => 'Warga Test PBI02',
             'email' => 'warga.test.pbi02@rimbawatch.org',
             'password_hash' => Hash::make('password123'),

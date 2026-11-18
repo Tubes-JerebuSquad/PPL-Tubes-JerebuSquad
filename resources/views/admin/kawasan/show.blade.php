@@ -20,6 +20,7 @@
         </div>
 
         <div class="flex flex-wrap gap-2">
+            <a href="{{ route('admin.kawasan.batas.index', $kawasan) }}" class="btn-secondary">Kelola Batas</a>
             <a href="{{ route('admin.kawasan.edit', $kawasan) }}" class="btn-primary">Edit</a>
             <a href="{{ route('admin.kawasan.index') }}" class="btn-secondary">Kembali ke daftar</a>
         </div>
