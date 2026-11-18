@@ -3,8 +3,10 @@
 namespace Tests\Feature\Katalog;
 
 use App\Enums\StatusKualitas;
+use App\Exceptions\MetadataBelumLengkapException;
 use App\Models\Kawasan;
 use App\Models\Pengguna;
+use App\Models\RiwayatSumberData;
 use App\Models\SumberData;
 use App\Models\Wilayah;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -149,6 +151,7 @@ class SumberDataKatalogTest extends TestCase
     public function test_label_metadata_belum_lengkap_memakai_nama_field_yang_mudah_dibaca(): void
     {
         $sumber = SumberData::factory()->make([
+            'jenis_sumber' => SumberData::JENIS_EKSTERNAL,
             'url_sumber' => null,
             'deskripsi_cakupan' => null,
             'interval_penyegaran_jam' => null,
@@ -163,6 +166,7 @@ class SumberDataKatalogTest extends TestCase
     public function test_tombol_aktivasi_nonaktif_dan_menampilkan_field_yang_kurang(): void
     {
         $sumber = SumberData::factory()->create([
+            'jenis_sumber' => SumberData::JENIS_EKSTERNAL,
             'url_sumber' => null,
             'deskripsi_cakupan' => null,
             'interval_penyegaran_jam' => null,
@@ -376,5 +380,42 @@ class SumberDataKatalogTest extends TestCase
             ->assertSee('0 rujukan')
             ->assertSee('Belum ada kawasan, batas kawasan, titik panas, atau log sinkronisasi yang merujuk dataset ini.')
             ->assertDontSee('Dataset ini sedang dirujuk oleh');
+    }
+
+    public function test_form_menyembunyikan_url_sumber_untuk_internal_dan_menampilkan_untuk_eksternal(): void
+    {
+        $internal = SumberData::factory()->create([
+            'jenis_sumber' => SumberData::JENIS_INTERNAL,
+            'url_sumber' => null,
+        ]);
+        $eksternal = SumberData::factory()->create([
+            'jenis_sumber' => SumberData::JENIS_EKSTERNAL,
+            'url_sumber' => 'https://firms.modaps.eosdis.nasa.gov/',
+        ]);
+
+        $this->get(route('katalog.sumber-data.create'))
+            ->assertOk()
+            ->assertSee('id="wadah-url-sumber" class="sm:col-span-2 hidden"', false);
+
+        $this->get(route('katalog.sumber-data.edit', $internal))
+            ->assertOk()
+            ->assertSee('id="wadah-url-sumber" class="sm:col-span-2 hidden"', false);
+
+        $this->get(route('katalog.sumber-data.edit', $eksternal))
+            ->assertOk()
+            ->assertSee('id="wadah-url-sumber" class="sm:col-span-2"', false);
+    }
+
+    public function test_pesan_exception_dan_riwayat_memakai_label_ramah_pengguna(): void
+    {
+        $exception = new MetadataBelumLengkapException(['url_sumber', 'interval_penyegaran_jam']);
+
+        $this->assertSame(
+            'Metadata belum lengkap: URL sumber, Interval penyegaran.',
+            $exception->getMessage(),
+        );
+
+        $this->assertSame('Internal', RiwayatSumberData::formatNilai('jenis_sumber', 'INTERNAL'));
+        $this->assertSame('Eksternal', RiwayatSumberData::formatNilai('jenis_sumber', 'EKSTERNAL'));
     }
 }

@@ -50,7 +50,7 @@
                 <dl class="mt-5 grid gap-x-6 gap-y-5 sm:grid-cols-2">
                     <div>
                         <dt class="text-xs font-medium uppercase tracking-wide text-ink-400">Jenis sumber</dt>
-                        <dd class="mt-1 text-sm text-ink-700">{{ $sumberData->jenis_sumber ?? '-' }}</dd>
+                        <dd class="mt-1 text-sm text-ink-700">{{ $sumberData->jenis_sumber ? ucfirst(strtolower($sumberData->jenis_sumber)) : '-' }}</dd>
                     </div>
 
                     <div>
@@ -58,18 +58,20 @@
                         <dd class="mt-1 text-sm text-ink-700">{{ $sumberData->nama_penyedia }}</dd>
                     </div>
 
-                    <div class="sm:col-span-2">
-                        <dt class="text-xs font-medium uppercase tracking-wide text-ink-400">URL sumber</dt>
-                        <dd class="mt-1 break-all text-sm">
-                            @if ($sumberData->url_sumber)
-                                <a href="{{ $sumberData->url_sumber }}" target="_blank" rel="noopener noreferrer" class="font-medium text-rimba-600 hover:text-rimba-700 hover:underline">
-                                    {{ $sumberData->url_sumber }}
-                                </a>
-                            @else
-                                <span class="text-ink-400">-</span>
-                            @endif
-                        </dd>
-                    </div>
+                    @if ($sumberData->jenis_sumber !== \App\Models\SumberData::JENIS_INTERNAL || $sumberData->url_sumber)
+                        <div class="sm:col-span-2">
+                            <dt class="text-xs font-medium uppercase tracking-wide text-ink-400">URL sumber</dt>
+                            <dd class="mt-1 break-all text-sm">
+                                @if ($sumberData->url_sumber)
+                                    <a href="{{ $sumberData->url_sumber }}" target="_blank" rel="noopener noreferrer" class="font-medium text-rimba-600 hover:text-rimba-700 hover:underline">
+                                        {{ $sumberData->url_sumber }}
+                                    </a>
+                                @else
+                                    <span class="text-ink-400">-</span>
+                                @endif
+                            </dd>
+                        </div>
+                    @endif
 
                     <div>
                         <dt class="text-xs font-medium uppercase tracking-wide text-ink-400">Nama lisensi</dt>
@@ -146,7 +148,12 @@
 
                 @if ($kawasanTerkait->isNotEmpty())
                     <div class="mt-6 border-t border-line pt-5">
-                        <h3 class="text-xs font-semibold uppercase tracking-[0.12em] text-ink-400">Kawasan yang merujuk</h3>
+                        <div class="flex items-center justify-between gap-2">
+                            <h3 class="text-xs font-semibold uppercase tracking-[0.12em] text-ink-400">Kawasan yang merujuk</h3>
+                            @if ($ringkasanPenggunaan['kawasan'] > $kawasanTerkait->count())
+                                <span class="text-xs text-ink-400">Menampilkan {{ $kawasanTerkait->count() }} dari {{ $ringkasanPenggunaan['kawasan'] }}</span>
+                            @endif
+                        </div>
                         <ul class="mt-3 divide-y divide-line rounded-xl border border-line">
                             @foreach ($kawasanTerkait as $kawasan)
                                 <li class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm">
@@ -172,7 +179,12 @@
 
                 @if ($batasTerkait->isNotEmpty())
                     <div class="mt-6 border-t border-line pt-5">
-                        <h3 class="text-xs font-semibold uppercase tracking-[0.12em] text-ink-400">Versi batas kawasan terbaru</h3>
+                        <div class="flex items-center justify-between gap-2">
+                            <h3 class="text-xs font-semibold uppercase tracking-[0.12em] text-ink-400">Versi batas kawasan terbaru</h3>
+                            @if ($ringkasanPenggunaan['batas_kawasan'] > $batasTerkait->count())
+                                <span class="text-xs text-ink-400">Menampilkan {{ $batasTerkait->count() }} dari {{ $ringkasanPenggunaan['batas_kawasan'] }}</span>
+                            @endif
+                        </div>
                         <ul class="mt-3 divide-y divide-line rounded-xl border border-line">
                             @foreach ($batasTerkait as $batas)
                                 <li class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm">

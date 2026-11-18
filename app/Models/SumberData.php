@@ -119,7 +119,8 @@ class SumberData extends Model
     public function riwayat(): HasMany
     {
         return $this->hasMany(RiwayatSumberData::class, 'sumber_id', 'sumber_id')
-            ->latest('dibuat_pada');
+            ->latest('dibuat_pada')
+            ->orderByDesc('riwayat_id');
     }
 
     /**
@@ -185,6 +186,10 @@ class SumberData extends Model
         $belumLengkap = [];
 
         foreach (self::FIELD_WAJIB_AKTIVASI as $field) {
+            if ($field === 'url_sumber' && $this->jenis_sumber === self::JENIS_INTERNAL) {
+                continue;
+            }
+
             $nilai = $this->getAttribute($field);
 
             if ($nilai === null || (is_string($nilai) && trim($nilai) === '')) {

@@ -1,4 +1,8 @@
-@php($sumber = $sumberData ?? null)
+@php
+    $sumber = $sumberData ?? null;
+    $jenisAktif = old('jenis_sumber', $sumber?->jenis_sumber ?? \App\Models\SumberData::JENIS_INTERNAL);
+    $sembunyikanUrl = $jenisAktif === \App\Models\SumberData::JENIS_INTERNAL && ! $errors->has('url_sumber');
+@endphp
 
 <form method="POST" action="{{ $aksi }}" class="space-y-8">
     @csrf
@@ -45,10 +49,11 @@
         <h2 class="text-xs font-semibold uppercase tracking-[0.14em] text-ink-400">Sumber &amp; lisensi</h2>
 
         <div class="mt-4 grid gap-5 sm:grid-cols-2">
-            <div class="sm:col-span-2">
+            <div id="wadah-url-sumber" @class(['sm:col-span-2', 'hidden' => $sembunyikanUrl])>
                 <label for="url_sumber" class="field-label">URL sumber</label>
                 <input id="url_sumber" name="url_sumber" type="url" maxlength="2048"
                     value="{{ old('url_sumber', $sumber?->url_sumber) }}" placeholder="https://..." class="field-input"
+                    @disabled($sembunyikanUrl)
                     @error('url_sumber') aria-invalid="true" aria-describedby="url_sumber-error" @enderror>
                 <x-ui.field-error name="url_sumber" />
             </div>
@@ -136,8 +141,37 @@
         </div>
     </section>
 
-    <div class="flex flex-col-reverse gap-3 border-t border-line pt-6 sm:flex-row sm:justify-end">
-        <a href="{{ $batal }}" class="btn-secondary">Batal</a>
-        <button type="submit" class="btn-primary">Simpan</button>
+    <div class="flex flex-col-reverse gap-3 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <p class="text-xs text-ink-400">
+            Kolom bertanda <span class="text-danger-ink">*</span> wajib saat menyimpan; deskripsi cakupan, periode mulai, dan interval penyegaran wajib sebelum aktivasi.
+        </p>
+
+        <div class="flex flex-col-reverse gap-3 sm:flex-row sm:shrink-0">
+            <a href="{{ $batal }}" class="btn-secondary">Batal</a>
+            <button type="submit" class="btn-primary">Simpan</button>
+        </div>
     </div>
 </form>
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const pilihJenis = document.getElementById('jenis_sumber');
+            const wadahUrl = document.getElementById('wadah-url-sumber');
+            const inputUrl = document.getElementById('url_sumber');
+
+            if (!pilihJenis || !wadahUrl || !inputUrl) {
+                return;
+            }
+
+            const sinkronUrl = () => {
+                const internal = pilihJenis.value === @json(\App\Models\SumberData::JENIS_INTERNAL);
+                wadahUrl.classList.toggle('hidden', internal);
+                inputUrl.disabled = internal;
+            };
+
+            pilihJenis.addEventListener('change', sinkronUrl);
+            sinkronUrl();
+        });
+    </script>
+@endpush

@@ -75,6 +75,10 @@ class RiwayatSumberData extends Model
             return $nilai ? 'Ya' : 'Tidak';
         }
 
+        if ($field === 'jenis_sumber') {
+            return ucfirst(strtolower((string) $nilai));
+        }
+
         if ($field === 'status_kualitas') {
             return StatusKualitas::tryFrom((string) $nilai)?->label() ?? (string) $nilai;
         }
