@@ -9,6 +9,7 @@ use App\Models\Pengguna;
 use App\Models\RiwayatSumberData;
 use App\Models\SumberData;
 use App\Models\Wilayah;
+use Database\Seeders\SumberDataSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -417,5 +418,15 @@ class SumberDataKatalogTest extends TestCase
 
         $this->assertSame('Internal', RiwayatSumberData::formatNilai('jenis_sumber', 'INTERNAL'));
         $this->assertSame('Eksternal', RiwayatSumberData::formatNilai('jenis_sumber', 'EKSTERNAL'));
+    }
+
+    public function test_seeder_sumber_data_idempoten_dan_mengisi_contoh_dataset(): void
+    {
+        $this->seed(SumberDataSeeder::class);
+        $this->seed(SumberDataSeeder::class);
+
+        $this->assertSame(5, SumberData::query()->count());
+        $this->assertSame(4, SumberData::query()->aktif()->count());
+        $this->assertSame(1, SumberData::query()->nonaktif()->count());
     }
 }
