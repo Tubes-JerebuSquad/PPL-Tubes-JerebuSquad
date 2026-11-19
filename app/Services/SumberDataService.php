@@ -40,6 +40,9 @@ class SumberDataService
     {
         return DB::transaction(function () use ($data, $pengguna) {
             $sumber = new SumberData($data);
+            if ($sumber->jenis_sumber === SumberData::JENIS_INTERNAL) {
+                $sumber->url_sumber = null;
+            }
             $sumber->is_aktif = false;
             $sumber->dibuat_oleh = $pengguna?->pengguna_id;
             $sumber->save();
@@ -73,6 +76,9 @@ class SumberDataService
             $sebelum = $this->petaNilai($sumber, self::FIELD_TERPANTAU);
 
             $sumber->fill($data);
+            if ($sumber->jenis_sumber === SumberData::JENIS_INTERNAL) {
+                $sumber->url_sumber = null;
+            }
 
             if ($sumber->is_aktif) {
                 $belumLengkap = $sumber->metadataBelumLengkap();

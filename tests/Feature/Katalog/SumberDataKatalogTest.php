@@ -3,9 +3,15 @@
 namespace Tests\Feature\Katalog;
 
 use App\Enums\StatusKualitas;
+use App\Exceptions\MetadataBelumLengkapException;
+use App\Models\Kawasan;
 use App\Models\Pengguna;
+use App\Models\RiwayatSumberData;
 use App\Models\SumberData;
+use App\Models\Wilayah;
+use Database\Seeders\SumberDataSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class SumberDataKatalogTest extends TestCase
@@ -146,6 +152,7 @@ class SumberDataKatalogTest extends TestCase
     public function test_label_metadata_belum_lengkap_memakai_nama_field_yang_mudah_dibaca(): void
     {
         $sumber = SumberData::factory()->make([
+            'jenis_sumber' => SumberData::JENIS_EKSTERNAL,
             'url_sumber' => null,
             'deskripsi_cakupan' => null,
             'interval_penyegaran_jam' => null,
@@ -160,6 +167,7 @@ class SumberDataKatalogTest extends TestCase
     public function test_tombol_aktivasi_nonaktif_dan_menampilkan_field_yang_kurang(): void
     {
         $sumber = SumberData::factory()->create([
+            'jenis_sumber' => SumberData::JENIS_EKSTERNAL,
             'url_sumber' => null,
             'deskripsi_cakupan' => null,
             'interval_penyegaran_jam' => null,
@@ -292,5 +300,151 @@ class SumberDataKatalogTest extends TestCase
         $this->assertSame(15, $paginator->perPage());
         $this->assertStringContainsString('cari=Dataset', $paginator->url(2));
         $this->assertStringContainsString('jenis_sumber=INTERNAL', $paginator->url(2));
+    }
+
+    public function test_scope_tersedia_untuk_pilihan_dan_ringkasan_atribusi(): void
+    {
+        $aktif = SumberData::factory()->aktif()->create([
+            'nama_sumber' => 'Sumber Aktif A',
+            'nama_penyedia' => 'KLHK',
+            'nama_lisensi' => 'CC BY 4.0',
+            'kode_crs' => 'EPSG:4326',
+        ]);
+        $nonaktif = SumberData::factory()->nonaktif()->create(['nama_sumber' => 'Sumber Nonaktif B']);
+
+        $pilihanAktif = SumberData::query()->tersediaUntukPilihan()->pluck('sumber_id')->all();
+        $this->assertSame([$aktif->sumber_id], $pilihanAktif);
+
+        $pilihanDenganEksisting = SumberData::query()
+            ->tersediaUntukPilihan($nonaktif->sumber_id)
+            ->pluck('sumber_id')
+            ->all();
+        $this->assertEqualsCanonicalizing([$aktif->sumber_id, $nonaktif->sumber_id], $pilihanDenganEksisting);
+
+        $this->assertSame(
+            'Sumber Aktif A — KLHK (CC BY 4.0 · EPSG:4326)',
+            $aktif->ringkasanAtribusi(),
+        );
+    }
+
+    public function test_katalog_dan_detail_menampilkan_penggunaan_pada_kawasan_dan_batas(): void
+    {
+        $sumber = SumberData::factory()->aktif()->create(['nama_sumber' => 'Dataset Batas Provinsi']);
+        $wilayah = Wilayah::factory()->create(['nama_wilayah' => 'Riau', 'is_aktif' => true]);
+
+        $kawasan = Kawasan::create([
+            'wilayah_id' => $wilayah->wilayah_id,
+            'nama_kawasan' => 'Taman Nasional Tesso Nilo',
+            'jenis_kawasan' => 'TAMAN_NASIONAL',
+            'status_kawasan' => 'AKTIF',
+            'sumber_id' => $sumber->sumber_id,
+            'is_aktif' => true,
+            'dibuat_oleh' => $this->admin->pengguna_id,
+        ]);
+
+        DB::statement(
+            "INSERT INTO batas_kawasan (kawasan_id, nomor_versi, data_geometri, kode_crs, sumber_id, status_validasi, pesan_validasi, dibuat_oleh, dibuat_pada)
+             VALUES (?, ?, ST_Multi(ST_SetSRID(ST_GeomFromText('POLYGON((101.44 -0.50, 101.45 -0.50, 101.45 -0.51, 101.44 -0.51, 101.44 -0.50))'), 4326)), ?, ?, ?, ?, ?, NOW())",
+            [
+                $kawasan->kawasan_id,
+                1,
+                'EPSG:4326',
+                $sumber->sumber_id,
+                'VALID',
+                'Validasi uji integrasi',
+                $this->admin->pengguna_id,
+            ],
+        );
+
+        $this->get(route('katalog.sumber-data.index'))
+            ->assertOk()
+            ->assertSee('Dipakai 1 kawasan · 1 batas');
+
+        $this->get(route('katalog.sumber-data.show', $sumber))
+            ->assertOk()
+            ->assertSee('Penggunaan dataset')
+            ->assertSee('2 rujukan')
+            ->assertSee('Taman Nasional Tesso Nilo')
+            ->assertSee('Riau')
+            ->assertSee('Versi #1')
+            ->assertSee(route('admin.kawasan.show', $kawasan), false)
+            ->assertSee(route('admin.kawasan.batas.index', $kawasan->kawasan_id), false)
+            ->assertSee('Dataset ini sedang dirujuk oleh 2 rekaman modul lain.');
+    }
+
+    public function test_detail_menampilkan_status_kosong_bila_belum_dirujuk_modul_lain(): void
+    {
+        $sumber = SumberData::factory()->aktif()->create();
+
+        $this->get(route('katalog.sumber-data.show', $sumber))
+            ->assertOk()
+            ->assertSee('0 rujukan')
+            ->assertSee('Belum ada kawasan, batas kawasan, titik panas, atau log sinkronisasi yang merujuk dataset ini.')
+            ->assertDontSee('Dataset ini sedang dirujuk oleh');
+    }
+
+    public function test_form_menyembunyikan_url_sumber_untuk_internal_dan_menampilkan_untuk_eksternal(): void
+    {
+        $internal = SumberData::factory()->create([
+            'jenis_sumber' => SumberData::JENIS_INTERNAL,
+            'url_sumber' => null,
+        ]);
+        $eksternal = SumberData::factory()->create([
+            'jenis_sumber' => SumberData::JENIS_EKSTERNAL,
+            'url_sumber' => 'https://firms.modaps.eosdis.nasa.gov/',
+        ]);
+
+        $this->get(route('katalog.sumber-data.create'))
+            ->assertOk()
+            ->assertSee('id="wadah-url-sumber" class="sm:col-span-2 hidden"', false);
+
+        $this->get(route('katalog.sumber-data.edit', $internal))
+            ->assertOk()
+            ->assertSee('id="wadah-url-sumber" class="sm:col-span-2 hidden"', false);
+
+        $this->get(route('katalog.sumber-data.edit', $eksternal))
+            ->assertOk()
+            ->assertSee('id="wadah-url-sumber" class="sm:col-span-2"', false);
+    }
+
+    public function test_pesan_exception_dan_riwayat_memakai_label_ramah_pengguna(): void
+    {
+        $exception = new MetadataBelumLengkapException(['url_sumber', 'interval_penyegaran_jam']);
+
+        $this->assertSame(
+            'Metadata belum lengkap: URL sumber, Interval penyegaran.',
+            $exception->getMessage(),
+        );
+
+        $this->assertSame('Internal', RiwayatSumberData::formatNilai('jenis_sumber', 'INTERNAL'));
+        $this->assertSame('Eksternal', RiwayatSumberData::formatNilai('jenis_sumber', 'EKSTERNAL'));
+    }
+
+    public function test_seeder_sumber_data_idempoten_dan_mengisi_contoh_dataset(): void
+    {
+        $this->seed(SumberDataSeeder::class);
+        $this->seed(SumberDataSeeder::class);
+
+        $this->assertSame(4, SumberData::query()->count());
+        $this->assertSame(3, SumberData::query()->aktif()->count());
+        $this->assertSame(1, SumberData::query()->nonaktif()->count());
+    }
+
+    public function test_edit_dataset_aktif_menampilkan_banner_error_dengan_label_ramah(): void
+    {
+        $sumber = SumberData::factory()->aktif()->create([
+            'jenis_sumber' => SumberData::JENIS_EKSTERNAL,
+            'interval_penyegaran_jam' => 24,
+        ]);
+
+        $this->from(route('katalog.sumber-data.edit', $sumber))
+            ->followingRedirects()
+            ->put(route('katalog.sumber-data.update', $sumber), [
+                'interval_penyegaran_jam' => null,
+            ])
+            ->assertOk()
+            ->assertSee('Metadata belum lengkap: Interval penyegaran.')
+            ->assertDontSee('interval_penyegaran_jam-error')
+            ->assertDontSee('Metadata belum lengkap: interval_penyegaran_jam');
     }
 }

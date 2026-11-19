@@ -109,6 +109,9 @@
                                     {{ $sumber->nama_sumber }}
                                 </a>
                                 <p class="mt-0.5 text-xs text-ink-400">{{ $sumber->nama_penyedia }}</p>
+                                <p class="mt-1 text-xs text-ink-500">
+                                    Dipakai {{ (int) ($sumber->kawasan_count ?? 0) }} kawasan · {{ (int) ($sumber->batas_kawasan_count ?? 0) }} batas
+                                </p>
                             </div>
 
                             <div class="flex shrink-0 items-center gap-3">
@@ -162,6 +165,9 @@
                                         {{ $sumber->nama_sumber }}
                                     </a>
                                     <p class="mt-0.5 text-xs text-ink-400">{{ $sumber->nama_penyedia }}</p>
+                                    <p class="mt-1 text-xs text-ink-500">
+                                        Dipakai {{ (int) ($sumber->kawasan_count ?? 0) }} kawasan · {{ (int) ($sumber->batas_kawasan_count ?? 0) }} batas
+                                    </p>
                                 </td>
                                 <td class="px-4 py-4 text-ink-500">{{ $sumber->format_data }}</td>
                                 <td class="px-4 py-4 text-ink-500">

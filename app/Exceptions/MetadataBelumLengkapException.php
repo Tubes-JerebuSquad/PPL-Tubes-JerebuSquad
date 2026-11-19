@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use App\Models\SumberData;
 use RuntimeException;
 
 class MetadataBelumLengkapException extends RuntimeException
@@ -13,6 +14,11 @@ class MetadataBelumLengkapException extends RuntimeException
         public readonly array $field,
         ?string $message = null,
     ) {
-        parent::__construct($message ?? 'Metadata belum lengkap: '.implode(', ', $field));
+        $label = array_map(
+            fn (string $nama): string => SumberData::LABEL_FIELD[$nama] ?? $nama,
+            $field,
+        );
+
+        parent::__construct($message ?? 'Metadata belum lengkap: '.implode(', ', $label).'.');
     }
 }

@@ -32,6 +32,7 @@ class SumberDataController extends Controller
         $status = $filter['is_aktif'] ?? null;
 
         $sumberData = SumberData::query()
+            ->withCount(['kawasan', 'batasKawasan'])
             ->when(
                 $cari !== null && $cari !== '',
                 fn (Builder $query) => $query->whereLike('nama_sumber', '%'.$cari.'%'),
@@ -63,7 +64,32 @@ class SumberDataController extends Controller
     {
         $sumberData->load(['pembuat', 'riwayat.pengguna']);
 
-        return view('katalog.sumber-data.show', ['sumberData' => $sumberData]);
+        $ringkasanPenggunaan = $sumberData->ringkasanPenggunaan();
+
+        $kawasanTerkait = $sumberData->kawasan()
+            ->with('wilayah')
+            ->limit(10)
+            ->get();
+
+        $batasTerkait = $sumberData->batasKawasan()
+            ->join('kawasan', 'batas_kawasan.kawasan_id', '=', 'kawasan.kawasan_id')
+            ->select([
+                'batas_kawasan.batas_id',
+                'batas_kawasan.kawasan_id',
+                'batas_kawasan.nomor_versi',
+                'batas_kawasan.status_validasi',
+                'batas_kawasan.dibuat_pada',
+                'kawasan.nama_kawasan',
+            ])
+            ->limit(10)
+            ->get();
+
+        return view('katalog.sumber-data.show', [
+            'sumberData' => $sumberData,
+            'ringkasanPenggunaan' => $ringkasanPenggunaan,
+            'kawasanTerkait' => $kawasanTerkait,
+            'batasTerkait' => $batasTerkait,
+        ]);
     }
 
     public function edit(SumberData $sumberData): View

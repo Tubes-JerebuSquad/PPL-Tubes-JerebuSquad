@@ -202,6 +202,7 @@ class SumberDataValidasiTest extends TestCase
     public function test_update_menolak_dataset_aktif_menjadi_tidak_lengkap(): void
     {
         $sumber = SumberData::factory()->aktif()->create([
+            'jenis_sumber' => SumberData::JENIS_EKSTERNAL,
             'url_sumber' => 'https://firms.modaps.eosdis.nasa.gov/',
         ]);
 
@@ -228,12 +229,28 @@ class SumberDataValidasiTest extends TestCase
 
     public function test_aktifkan_ditolak_bila_metadata_belum_lengkap(): void
     {
-        $sumber = SumberData::factory()->create(['url_sumber' => null]);
+        $sumber = SumberData::factory()->create([
+            'jenis_sumber' => SumberData::JENIS_EKSTERNAL,
+            'url_sumber' => null,
+        ]);
 
         $respons = $this->patch(route('katalog.sumber-data.aktifkan', $sumber));
 
         $respons->assertSessionHasErrors('metadata');
         $this->assertFalse($sumber->fresh()->is_aktif);
+    }
+
+    public function test_aktifkan_mengizinkan_sumber_internal_tanpa_url_sumber(): void
+    {
+        $sumber = SumberData::factory()->nonaktif()->create([
+            'jenis_sumber' => SumberData::JENIS_INTERNAL,
+            'url_sumber' => null,
+        ]);
+
+        $respons = $this->patch(route('katalog.sumber-data.aktifkan', $sumber));
+
+        $respons->assertSessionHasNoErrors();
+        $this->assertTrue($sumber->fresh()->is_aktif);
     }
 
     public function test_nonaktifkan_menyimpan_alasan(): void
@@ -336,5 +353,28 @@ class SumberDataValidasiTest extends TestCase
             'aksi' => 'DINONAKTIFKAN',
             'catatan' => 'Selesai uji alur',
         ]);
+    }
+
+    public function test_simpan_dan_ubah_ke_internal_mengosongkan_url_sumber(): void
+    {
+        $this->post(route('katalog.sumber-data.store'), $this->dataValid([
+            'nama_sumber' => 'Digitasi Internal Baru',
+            'jenis_sumber' => SumberData::JENIS_INTERNAL,
+            'url_sumber' => 'https://contoh-sisa.example.org/',
+        ]))->assertSessionHasNoErrors();
+
+        $internal = SumberData::query()->where('nama_sumber', 'Digitasi Internal Baru')->firstOrFail();
+        $this->assertNull($internal->url_sumber);
+
+        $eksternal = SumberData::factory()->aktif()->create([
+            'jenis_sumber' => SumberData::JENIS_EKSTERNAL,
+            'url_sumber' => 'https://firms.modaps.eosdis.nasa.gov/',
+        ]);
+
+        $this->put(route('katalog.sumber-data.update', $eksternal), [
+            'jenis_sumber' => SumberData::JENIS_INTERNAL,
+        ])->assertSessionHasNoErrors();
+
+        $this->assertNull($eksternal->fresh()->url_sumber);
     }
 }
