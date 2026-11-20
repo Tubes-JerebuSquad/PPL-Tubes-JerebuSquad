@@ -12,10 +12,16 @@
                 'ikon' => 'grid',
             ],
             [
-                'label' => 'Data Kawasan',
-                'route' => null,
-                'pola' => null,
+                'label' => 'Peta Interaktif',
+                'route' => 'peta.index',
+                'pola' => 'peta.*',
                 'ikon' => 'map',
+            ],
+            [
+                'label' => 'Data Kawasan',
+                'route' => 'admin.kawasan.index',
+                'pola' => 'admin.kawasan.*',
+                'ikon' => 'database',
             ],
             [
                 'label' => 'Sumber Data',
@@ -45,6 +51,12 @@
                 'ikon' => 'grid',
             ],
             [
+                'label' => 'Peta Interaktif',
+                'route' => 'peta.index',
+                'pola' => 'peta.*',
+                'ikon' => 'map',
+            ],
+            [
                 'label' => 'Verifikasi Laporan',
                 'route' => null,
                 'pola' => null,
@@ -70,6 +82,12 @@
                 'route' => 'petugas.dashboard',
                 'pola' => 'petugas.dashboard*',
                 'ikon' => 'grid',
+            ],
+            [
+                'label' => 'Peta Interaktif',
+                'route' => 'peta.index',
+                'pola' => 'peta.*',
+                'ikon' => 'map',
             ],
             [
                 'label' => 'Surat Tugas Inspeksi',
@@ -99,15 +117,21 @@
                 'ikon' => 'grid',
             ],
             [
+                'label' => 'Peta Interaktif',
+                'route' => 'peta.index',
+                'pola' => 'peta.*',
+                'ikon' => 'map',
+            ],
+            [
                 'label' => 'Laporan Saya',
-                'route' => null,
-                'pola' => null,
+                'route' => 'masyarakat.laporan.index',
+                'pola' => 'masyarakat.laporan.*',
                 'ikon' => 'database',
             ],
             [
                 'label' => 'Buat Pengaduan',
-                'route' => null,
-                'pola' => null,
+                'route' => 'masyarakat.laporan.create',
+                'pola' => 'masyarakat.laporan.create',
                 'ikon' => 'map',
             ],
             [

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\KawasanController;
 use App\Http\Controllers\Admin\LogAuditController;
 use App\Http\Controllers\Admin\PenggunaController;
 use Illuminate\Support\Facades\Route;
@@ -11,7 +12,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         ->name('pengguna.nonaktifkan');
 
     Route::patch('pengguna/{pengguna}/aktifkan', [PenggunaController::class, 'aktifkan'])
-               ->name('pengguna.aktifkan');
+        ->name('pengguna.aktifkan');
 
     Route::get('audit', [LogAuditController::class, 'index'])->name('audit.index');
-     });
+
+    Route::resource('kawasan', KawasanController::class)->only(['index', 'show', 'create', 'store', 'edit', 'update']);
+});

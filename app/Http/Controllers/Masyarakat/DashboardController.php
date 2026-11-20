@@ -30,14 +30,14 @@ class DashboardController extends Controller
         $laporanDiproses = Schema::hasTable('laporan')
             ? DB::table('laporan')
                 ->where('pelapor_id', $userId)
-                ->whereIn('status', ['menunggu_verifikasi', 'MENUNGGU_VERIFIKASI', 'diverifikasi', 'DIVERIFIKASI', 'dalam_inspeksi', 'DALAM_INSPEKSI'])
+                ->whereIn('status_laporan', ['menunggu_verifikasi', 'MENUNGGU_VERIFIKASI', 'diverifikasi', 'DIVERIFIKASI', 'dalam_inspeksi', 'DALAM_INSPEKSI'])
                 ->count()
             : 0;
 
         $laporanSelesai = Schema::hasTable('laporan')
             ? DB::table('laporan')
                 ->where('pelapor_id', $userId)
-                ->whereIn('status', ['selesai', 'SELESAI'])
+                ->whereIn('status_laporan', ['selesai', 'SELESAI'])
                 ->count()
             : 0;
 
@@ -48,7 +48,7 @@ class DashboardController extends Controller
         $riwayatLaporan = Schema::hasTable('laporan')
             ? DB::table('laporan')
                 ->where('pelapor_id', $userId)
-                ->orderByDesc('created_at')
+                ->orderByDesc('dibuat_pada')
                 ->take(5)
                 ->get()
             : collect();

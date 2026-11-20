@@ -127,10 +127,10 @@
                                     <td class="py-3 px-3 font-medium text-ink-900">{{ $lap->kategori ?? 'Laporan Lingkungan' }}</td>
                                     <td class="py-3 px-3">
                                         <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                                            {{ strtoupper($lap->status ?? 'MENUNGGU') }}
+                                            {{ strtoupper($lap->status_laporan ?? 'MENUNGGU') }}
                                         </span>
                                     </td>
-                                    <td class="py-3 px-3 text-xs text-ink-400">{{ $lap->created_at ?? '-' }}</td>
+                                    <td class="py-3 px-3 text-xs text-ink-400">{{ $lap->dibuat_pada ?? '-' }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
