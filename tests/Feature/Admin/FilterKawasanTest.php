@@ -6,6 +6,9 @@ use App\Models\Kawasan;
 use App\Models\Pengguna;
 use App\Models\Wilayah;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Testing\TestResponse;
+use Mockery;
 use Tests\TestCase;
 
 class FilterKawasanTest extends TestCase
@@ -274,13 +277,14 @@ class FilterKawasanTest extends TestCase
         $this->buatKawasan(['nama_kawasan' => 'Kawasan Alfa']);
         $this->buatKawasan(['nama_kawasan' => 'Kawasan Beta']);
 
-        $this->actingAs($admin)
-            ->get(route('admin.kawasan.index', [
-                'min_lon' => 106.7,
-                'min_lat' => -6.4,
-                'max_lon' => 106.9,
-                'max_lat' => -6.1,
-            ]))
+        $this->actingAs($admin);
+
+        $this->getDenganDriverNonspasial(route('admin.kawasan.index', [
+            'min_lon' => 106.7,
+            'min_lat' => -6.4,
+            'max_lon' => 106.9,
+            'max_lat' => -6.1,
+        ]))
             ->assertOk()
             ->assertSee('Kawasan Alfa')
             ->assertSee('Kawasan Beta')
@@ -292,14 +296,34 @@ class FilterKawasanTest extends TestCase
         $admin = Pengguna::factory()->admin()->create();
         $this->buatKawasan(['nama_kawasan' => 'Kawasan Alfa']);
 
-        $this->actingAs($admin)
-            ->get(route('admin.kawasan.index', [
-                'min_lon' => 106.7,
-                'min_lat' => -6.4,
-            ]))
+        $this->actingAs($admin);
+
+        $this->getDenganDriverNonspasial(route('admin.kawasan.index', [
+            'min_lon' => 106.7,
+            'min_lat' => -6.4,
+        ]))
             ->assertOk()
             ->assertSee('Kawasan Alfa')
             ->assertSessionHasNoErrors();
+    }
+
+    private function getDenganDriverNonspasial(string $url): TestResponse
+    {
+        $database = DB::getFacadeRoot();
+        $koneksi = Mockery::mock($database->connection());
+        $koneksi->shouldReceive('getDriverName')->atLeast()->once()->andReturn('sqlite');
+
+        // Proxy meneruskan operasi lain ke koneksi PostgreSQL yang sama.
+        $proxy = Mockery::mock($database);
+        $proxy->shouldReceive('connection')->withNoArgs()->andReturn($koneksi);
+
+        DB::swap($proxy);
+
+        try {
+            return $this->get($url);
+        } finally {
+            DB::swap($database);
+        }
     }
 
     private function buatWilayah(string $nama): Wilayah

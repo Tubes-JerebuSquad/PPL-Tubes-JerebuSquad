@@ -48,7 +48,7 @@
                 </div>
 
                 <div>
-                    <dt class="text-xs font-medium text-ink-400">Status Kawasan</dt>
+                    <dt class="text-xs font-medium text-ink-400">Status Penetapan</dt>
                     <dd class="mt-1 text-sm text-ink-900">{{ $kawasan->status_kawasan }}</dd>
                 </div>
 
@@ -107,7 +107,7 @@
                 </div>
 
                 <div>
-                    <dt class="text-xs font-medium text-ink-400">Status Data</dt>
+                    <dt class="text-xs font-medium text-ink-400">Status Data Kawasan</dt>
                     <dd class="mt-1">
                         @if ($kawasan->is_aktif)
                             <x-ui.badge variant="success">Aktif</x-ui.badge>

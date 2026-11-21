@@ -54,7 +54,7 @@
             </div>
 
             <div>
-                <label for="status_kawasan" class="{{ $kelasLabelFilter }}">Status Kawasan</label>
+                <label for="status_kawasan" class="{{ $kelasLabelFilter }}">Status Penetapan</label>
                 <select id="status_kawasan" name="status_kawasan" class="{{ $kelasInputFilter }}">
                     <option value="">Semua status</option>
                     @foreach ($daftarStatus as $status)
@@ -66,7 +66,7 @@
             </div>
 
             <div>
-                <label for="status_data" class="{{ $kelasLabelFilter }}">Status Data</label>
+                <label for="status_data" class="{{ $kelasLabelFilter }}">Status Data Kawasan</label>
                 <select id="status_data" name="status_data" class="{{ $kelasInputFilter }}">
                     <option value="">Semua data</option>
                     <option value="aktif" @selected(request('status_data') === 'aktif')>Aktif</option>
@@ -175,10 +175,10 @@
                                 Jenis
                             </th>
                             <th scope="col" class="px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-ink-400">
-                                Status Kawasan
+                                Status Penetapan
                             </th>
                             <th scope="col" class="px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-ink-400">
-                                Status Data
+                                Status Data Kawasan
                             </th>
                             <th scope="col" class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.08em] text-ink-400">
                                 Aksi
@@ -193,6 +193,11 @@
                                        class="font-medium text-ink-900 hover:text-rimba-600">
                                         {{ $kawasan->nama_kawasan }}
                                     </a>
+                                    @php($namaSumber = $kawasan->sumber?->nama_sumber ?? 'Belum ditautkan')
+                                    <div class="mt-1 flex min-w-0 items-center gap-1.5 text-xs text-ink-400">
+                                        @include('partials.ikon', ['nama' => 'database', 'kelas' => 'h-3.5 w-3.5 shrink-0'])
+                                        <span class="min-w-0 truncate" title="{{ $namaSumber }}">Sumber: {{ $namaSumber }}</span>
+                                    </div>
                                 </td>
                                 <td class="px-4 py-3 align-middle">
                                     {{ $kawasan->wilayah?->nama_wilayah ?? '—' }}

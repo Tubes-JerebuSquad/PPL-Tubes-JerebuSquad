@@ -29,6 +29,33 @@ class HalamanKawasanTest extends TestCase
             ->assertSee($kawasan->wilayah->nama_wilayah);
     }
 
+    public function test_daftar_kawasan_menampilkan_sumber_aktif_nonaktif_dan_belum_ditautkan(): void
+    {
+        $admin = Pengguna::factory()->admin()->create();
+        $namaSumberAktif = 'Peta tutupan hutan dan inventarisasi kawasan konservasi regional';
+        $this->buatKawasan([
+            'nama_kawasan' => 'Kawasan Alfa',
+            'sumber_id' => $this->buatSumberData(aktif: true, nama: $namaSumberAktif),
+        ]);
+        $this->buatKawasan([
+            'nama_kawasan' => 'Kawasan Beta',
+            'sumber_id' => $this->buatSumberData(aktif: false, nama: 'Peta Arsip'),
+        ]);
+        $this->buatKawasan(['nama_kawasan' => 'Kawasan Gamma', 'sumber_id' => null]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.kawasan.index'))
+            ->assertOk()
+            ->assertSeeTextInOrder([
+                'Kawasan Alfa',
+                'Sumber: '.$namaSumberAktif,
+                'Kawasan Beta',
+                'Sumber: Peta Arsip',
+                'Kawasan Gamma',
+                'Sumber: Belum ditautkan',
+            ]);
+    }
+
     public function test_admin_aktif_bisa_membuka_detail_kawasan(): void
     {
         $admin = Pengguna::factory()->admin()->create();

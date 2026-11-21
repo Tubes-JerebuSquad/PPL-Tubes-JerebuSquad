@@ -82,10 +82,10 @@
     </div>
 
     <div>
-        <label for="status_kawasan" class="{{ $kelasLabel }}">Status Kawasan</label>
+        <label for="status_kawasan" class="{{ $kelasLabel }}">Status Penetapan</label>
         <input type="text" id="status_kawasan" name="status_kawasan"
                value="{{ old('status_kawasan', $kawasan?->status_kawasan) }}"
-               required maxlength="50" placeholder="Masukkan status kawasan"
+               required maxlength="50" placeholder="Masukkan status penetapan"
                @class([
                    'field-input',
                    $kelasDasarInput,
@@ -146,7 +146,7 @@
             <input type="checkbox" id="is_aktif" name="is_aktif" value="1"
                    @checked(old('is_aktif', $kawasan?->is_aktif ?? true))
                    class="h-4 w-4 shrink-0 rounded border-line-strong accent-rimba-600 focus:ring-2 focus:ring-rimba-600/30">
-            Aktifkan Data Kawasan
+            Status Data Kawasan: Aktif
         </label>
         <p class="mt-1.5 text-xs text-ink-400">Data nonaktif tetap tersimpan, tetapi ditandai tidak aktif pada daftar.</p>
     </div>

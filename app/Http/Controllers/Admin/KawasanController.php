@@ -23,7 +23,7 @@ class KawasanController extends Controller
         $spasialTersedia = DB::connection()->getDriverName() === 'pgsql';
         $bbox = $spasialTersedia ? $request->bbox() : null;
 
-        $query = Kawasan::with('wilayah')
+        $query = Kawasan::with(['wilayah', 'sumber:sumber_id,nama_sumber'])
             ->cari($request->query('cari'))
             ->berwilayah($request->integer('wilayah_id') ?: null)
             ->berjenis($request->query('jenis_kawasan'))
