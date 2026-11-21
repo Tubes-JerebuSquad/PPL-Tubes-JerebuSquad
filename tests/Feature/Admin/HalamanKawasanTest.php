@@ -2,10 +2,12 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Enums\StatusKualitas;
 use App\Models\Kawasan;
 use App\Models\Pengguna;
 use App\Models\Wilayah;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class HalamanKawasanTest extends TestCase
@@ -160,5 +162,117 @@ class HalamanKawasanTest extends TestCase
             'jenis_kawasan' => 'HUTAN_LINDUNG',
             'status_kawasan' => 'AKTIF',
         ], $attributes));
+    }
+
+    // ── Helper ───────────────────────────────────────────────────────────────
+
+    private function buatSumberData(
+        bool $aktif = true,
+        string $nama = 'Sumber Uji',
+        string $penyedia = 'Penyedia Uji',
+        string $lisensi = 'CC BY 4.0',
+        string $crs = 'EPSG:4326',
+    ): int {
+        return DB::table('sumber_data')->insertGetId([
+            'nama_sumber'     => $nama,
+            'nama_penyedia'   => $penyedia,
+            'nama_lisensi'    => $lisensi,
+            'format_data'     => 'GeoJSON',
+            'kode_crs'        => $crs,
+            'status_kualitas' => StatusKualitas::VERIFIED->value,
+            'is_aktif'        => $aktif,
+        ], 'sumber_id');
+    }
+
+    // ── Skenario Sumber Data (Detail Kawasan) ────────────────────────────────
+
+    public function test_detail_kawasan_tanpa_sumber_menampilkan_belum_ditautkan(): void
+    {
+        $admin   = Pengguna::factory()->admin()->create();
+        $kawasan = $this->buatKawasan(['sumber_id' => null]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.kawasan.show', $kawasan))
+            ->assertOk()
+            ->assertSee('Belum ditautkan');
+    }
+
+    public function test_detail_kawasan_dengan_sumber_aktif_menampilkan_nama_dan_badge(): void
+    {
+        $admin    = Pengguna::factory()->admin()->create();
+        $sumberId = $this->buatSumberData(aktif: true, nama: 'Sumber BIG');
+        $kawasan  = $this->buatKawasan(['sumber_id' => $sumberId]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.kawasan.show', $kawasan))
+            ->assertOk()
+            ->assertSee('Sumber BIG')
+            ->assertSee('Aktif');
+    }
+
+    public function test_detail_kawasan_dengan_sumber_nonaktif_menampilkan_peringatan(): void
+    {
+        $admin    = Pengguna::factory()->admin()->create();
+        $sumberId = $this->buatSumberData(aktif: false, nama: 'Sumber Nonaktif Lama');
+        $kawasan  = $this->buatKawasan(['sumber_id' => $sumberId]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.kawasan.show', $kawasan))
+            ->assertOk()
+            ->assertSee('Sumber Nonaktif Lama')
+            ->assertSee('Nonaktif')
+            ->assertSee('tidak tersedia untuk pemilihan baru');
+    }
+
+    public function test_detail_kawasan_menampilkan_metadata_penyedia_lisensi_crs(): void
+    {
+        $admin    = Pengguna::factory()->admin()->create();
+        $sumberId = $this->buatSumberData(
+            aktif:    true,
+            nama:     'Sumber Lengkap',
+            penyedia: 'Badan Informasi Geospasial',
+            lisensi:  'CC BY-SA 4.0',
+            crs:      'EPSG:32748',
+        );
+        $kawasan = $this->buatKawasan(['sumber_id' => $sumberId]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.kawasan.show', $kawasan))
+            ->assertOk()
+            ->assertSee('Badan Informasi Geospasial')
+            ->assertSee('CC BY-SA 4.0')
+            ->assertSee('EPSG:32748');
+    }
+
+    public function test_detail_kawasan_dengan_metadata_opsional_kosong_menampilkan_tanda_pisah(): void
+    {
+        $admin = Pengguna::factory()->admin()->create();
+        $sumberId = $this->buatSumberData(
+            aktif:    true,
+            nama:     'Sumber Minimal',
+            penyedia: '',
+            lisensi:  '',
+            crs:      '',
+        );
+        $kawasan = $this->buatKawasan(['sumber_id' => $sumberId]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.kawasan.show', $kawasan))
+            ->assertOk()
+            ->assertSee('Sumber Minimal')
+            ->assertSee('—');
+    }
+
+    public function test_detail_kawasan_menampilkan_tautan_ke_katalog_sumber_data(): void
+    {
+        $admin    = Pengguna::factory()->admin()->create();
+        $sumberId = $this->buatSumberData(aktif: true, nama: 'Sumber Terhubung');
+        $kawasan  = $this->buatKawasan(['sumber_id' => $sumberId]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.kawasan.show', $kawasan))
+            ->assertOk()
+            ->assertSee('Lihat detail sumber data')
+            ->assertSee(route('katalog.sumber-data.show', $sumberId), false);
     }
 }
