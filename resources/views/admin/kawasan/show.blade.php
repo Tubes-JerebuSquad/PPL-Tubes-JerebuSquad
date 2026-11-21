@@ -148,5 +148,48 @@
                 </div>
             </dl>
         </x-ui.card>
+
+        <x-ui.card class="p-5 lg:col-span-3">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+                <h2 class="text-xs font-semibold uppercase tracking-[0.12em] text-ink-400">Informasi Geospasial</h2>
+                <a href="{{ route('admin.kawasan.batas.index', ['kawasan' => $kawasan->kawasan_id]) }}"
+                   class="btn-secondary">Kelola Batas Kawasan</a>
+            </div>
+
+            @if ($batasTerbaru)
+                <dl class="mt-4 grid gap-x-6 gap-y-4 sm:grid-cols-2">
+                    <div>
+                        <dt class="text-xs font-medium text-ink-400">Nomor versi batas terbaru</dt>
+                        <dd class="mt-1 text-sm text-ink-900">Versi {{ $batasTerbaru->nomor_versi }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-medium text-ink-400">Sistem koordinat</dt>
+                        <dd class="mt-1 text-sm text-ink-900">WGS 84 (EPSG:4326)</dd>
+                    </div>
+                </dl>
+
+                <h3 class="mt-5 text-sm font-medium text-ink-700">Bounding Box</h3>
+                <dl class="mt-2 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
+                    <div>
+                        <dt class="text-xs font-medium text-ink-400">Bujur minimum</dt>
+                        <dd class="mt-1 text-sm tabular-nums text-ink-900">{{ $batasTerbaru->min_lon }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-medium text-ink-400">Bujur maksimum</dt>
+                        <dd class="mt-1 text-sm tabular-nums text-ink-900">{{ $batasTerbaru->max_lon }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-medium text-ink-400">Lintang minimum</dt>
+                        <dd class="mt-1 text-sm tabular-nums text-ink-900">{{ $batasTerbaru->min_lat }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-medium text-ink-400">Lintang maksimum</dt>
+                        <dd class="mt-1 text-sm tabular-nums text-ink-900">{{ $batasTerbaru->max_lat }}</dd>
+                    </div>
+                </dl>
+            @else
+                <p class="mt-3 text-sm text-ink-700">Belum ada poligon batas kawasan</p>
+            @endif
+        </x-ui.card>
     </div>
 @endsection

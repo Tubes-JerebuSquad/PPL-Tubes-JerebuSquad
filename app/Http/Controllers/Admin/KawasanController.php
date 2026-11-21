@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\SimpanKawasanRequest;
 use App\Http\Requests\Admin\UbahKawasanRequest;
+use App\Models\BatasKawasan;
 use App\Models\Kawasan;
 use App\Models\SumberData;
 use App\Models\Wilayah;
@@ -50,8 +51,17 @@ class KawasanController extends Controller
     {
         $kawasan->load(['wilayah', 'pembuat', 'sumber']);
 
+        $batasTerbaru = BatasKawasan::query()
+            ->where('kawasan_id', $kawasan->kawasan_id)
+            ->orderByDesc('nomor_versi')
+            ->select('nomor_versi')
+            ->selectRaw('ST_XMin(data_geometri) AS min_lon, ST_YMin(data_geometri) AS min_lat')
+            ->selectRaw('ST_XMax(data_geometri) AS max_lon, ST_YMax(data_geometri) AS max_lat')
+            ->first();
+
         return view('admin.kawasan.show', [
             'kawasan' => $kawasan,
+            'batasTerbaru' => $batasTerbaru,
         ]);
     }
 
