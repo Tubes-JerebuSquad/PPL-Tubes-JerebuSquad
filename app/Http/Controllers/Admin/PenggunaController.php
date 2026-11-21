@@ -75,8 +75,14 @@ class PenggunaController extends Controller
         $password = $data['password'] ?? null;
         unset($data['password']);
 
-        if (filled($password)) {
+                if (filled($password)) {
             $data['password_hash'] = $password;
+        }
+
+        if ($this->adminAktifTerakhirKehilanganPeran($pengguna, $data)) {
+            return back()
+                ->withInput()
+                ->withErrors(['peran_id' => 'Peran tidak dapat diubah karena ini adalah satu-satunya Admin aktif.']);
         }
 
         DB::transaction(function () use ($request, $pengguna, $data) {
@@ -131,6 +137,27 @@ class PenggunaController extends Controller
         });
 
         return back()->with('status', 'Akun berhasil diaktifkan.');
+    }
+    
+        private function adminAktifTerakhirKehilanganPeran(Pengguna $pengguna, array $data): bool
+    {
+        if (! $pengguna->isAdmin() || ! $pengguna->isAktif()) {
+            return false;
+        }
+
+        $tetapAdmin = Peran::whereKey($data['peran_id'] ?? $pengguna->peran_id)
+            ->where('nama_peran', 'Admin')
+            ->exists();
+
+        if ($tetapAdmin) {
+            return false;
+        }
+
+        $jumlahAdminAktif = Pengguna::where('status_akun', Pengguna::STATUS_AKTIF)
+            ->whereHas('peran', fn ($query) => $query->where('nama_peran', 'Admin'))
+            ->count();
+
+        return $jumlahAdminAktif <= 1;
     }
 
     private function rincianPerubahan(Pengguna $pengguna): array

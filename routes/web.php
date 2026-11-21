@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Masyarakat\DashboardController as MasyarakatDashboardController;
 use App\Http\Controllers\Pengawas\DashboardController as PengawasDashboardController;
+use App\Http\Controllers\PetaInteraktifController;
 use App\Http\Controllers\Petugas\DashboardController as PetugasDashboardController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,10 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', [DaftarController::class, 'create'])->name('register');
     Route::post('/register', [DaftarController::class, 'store'])->middleware('throttle:5,1');
 });
+
+// Peta Interaktif Multi-Layer (PBI-04 / FR-04) - Terbuka untuk seluruh peran & publik
+Route::get('/peta', [PetaInteraktifController::class, 'index'])->name('peta.index');
+Route::get('/peta-interaktif', [PetaInteraktifController::class, 'index'])->name('peta.interaktif');
 
 // Rute yang membutuhkan autentikasi
 Route::middleware('auth')->group(function () {
@@ -45,7 +50,12 @@ Route::middleware('auth')->group(function () {
     // Dashboard Peran Masyarakat / Warga
     Route::prefix('masyarakat')->name('masyarakat.')->group(function () {
         Route::get('/dashboard', [MasyarakatDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/laporan/buat', [\App\Http\Controllers\Masyarakat\LaporanController::class, 'create'])->name('laporan.create');
+        Route::post('/laporan', [\App\Http\Controllers\Masyarakat\LaporanController::class, 'store'])->name('laporan.store');
     });
 });
 
 require __DIR__.'/admin.php';
+require __DIR__.'/katalog.php';
+require __DIR__.'/laporan.php';
+require __DIR__.'/digitasi_batas_kawasan.php';

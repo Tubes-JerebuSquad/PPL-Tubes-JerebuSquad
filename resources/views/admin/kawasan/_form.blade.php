@@ -1,6 +1,12 @@
 @php
     $kawasan ??= null;
+    $daftarSumber ??= collect();
     $sedangDiubah = $kawasan !== null;
+
+    $sumberTerpilih = old('sumber_id', $kawasan?->sumber_id);
+    $sumberTerpilih = is_numeric($sumberTerpilih) ? (int) $sumberTerpilih : null;
+    $sumberTerpilihHilang = $sumberTerpilih !== null
+        && ! $daftarSumber->contains(fn ($sumber) => (int) $sumber->sumber_id === $sumberTerpilih);
 
     // Kelas utilitas disertakan langsung agar formulir tetap tampil benar
     // saat aplikasi memakai fallback Tailwind CDN (Vite belum di-build).
@@ -88,6 +94,34 @@
                @error('status_kawasan') aria-invalid="true" aria-describedby="status_kawasan-error" @enderror>
         @error('status_kawasan')
             <p id="status_kawasan-error" class="mt-1.5 text-xs font-medium text-danger-ink">{{ $message }}</p>
+        @enderror
+    </div>
+
+    <div>
+        <label for="sumber_id" class="{{ $kelasLabel }}">Sumber Data Kawasan (opsional)</label>
+        <select id="sumber_id" name="sumber_id"
+                @class([
+                    'field-input',
+                    $kelasDasarInput,
+                    $errors->has('sumber_id') ? $kelasInputGalat : $kelasInputNormal,
+                ])
+                @error('sumber_id') aria-invalid="true" aria-describedby="sumber_id-error" @enderror>
+            <option value="" @selected($sumberTerpilih === null)>— Tanpa sumber data —</option>
+            @foreach ($daftarSumber as $sumber)
+                <option value="{{ $sumber->sumber_id }}"
+                        @selected($sumberTerpilih === (int) $sumber->sumber_id)>
+                    {{ $sumber->nama_sumber }}@if (filled($sumber->kode_crs)) ({{ $sumber->kode_crs }})@endif{{ $sumber->is_aktif ? '' : ' (nonaktif)' }}
+                </option>
+            @endforeach
+            @if ($sumberTerpilihHilang)
+                <option value="{{ $sumberTerpilih }}" selected>Sumber tidak ditemukan (#{{ $sumberTerpilih }})</option>
+            @endif
+        </select>
+        @if ($daftarSumber->isEmpty())
+            <p class="mt-1.5 text-xs text-ink-400">Belum ada sumber data aktif yang dapat dipilih. Kawasan tetap dapat disimpan tanpa sumber data; tambahkan sumber lewat menu Katalog Sumber Data.</p>
+        @endif
+        @error('sumber_id')
+            <p id="sumber_id-error" class="mt-1.5 text-xs font-medium text-danger-ink">{{ $message }}</p>
         @enderror
     </div>
 

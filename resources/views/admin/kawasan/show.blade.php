@@ -53,9 +53,56 @@
                 </div>
 
                 <div>
-                    <dt class="text-xs font-medium text-ink-400">Sumber data</dt>
+                    <dt class="text-xs font-medium text-ink-400">Sumber data kawasan</dt>
                     <dd class="mt-1 text-sm text-ink-900">
-                        {{ $kawasan->sumber_id ? 'Sumber #'.$kawasan->sumber_id : '—' }}
+                        @php
+                            $sumberKawasan = $kawasan->sumber;
+                        @endphp
+
+                        @if ($sumberKawasan)
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="font-semibold">{{ $sumberKawasan->nama_sumber }}</span>
+                                <x-ui.badge :variant="$sumberKawasan->is_aktif ? 'success' : 'danger'">
+                                    {{ $sumberKawasan->is_aktif ? 'Aktif' : 'Nonaktif' }}
+                                </x-ui.badge>
+                            </div>
+
+                            <dl class="mt-2 space-y-1 text-xs text-ink-500">
+                                <div class="flex gap-1">
+                                    <dt class="shrink-0 font-medium text-ink-400">Penyedia:</dt>
+                                    <dd class="min-w-0 break-words">{{ $sumberKawasan->nama_penyedia ?: '—' }}</dd>
+                                </div>
+                                <div class="flex gap-1">
+                                    <dt class="shrink-0 font-medium text-ink-400">Lisensi:</dt>
+                                    <dd class="min-w-0 break-words">{{ $sumberKawasan->nama_lisensi ?: '—' }}</dd>
+                                </div>
+                                <div class="flex gap-1">
+                                    <dt class="shrink-0 font-medium text-ink-400">CRS:</dt>
+                                    <dd class="min-w-0 break-words">{{ $sumberKawasan->kode_crs ?: '—' }}</dd>
+                                </div>
+                            </dl>
+
+                            @if (! $sumberKawasan->is_aktif)
+                                <p class="mt-2 rounded-lg border border-amber-ink/20 bg-amber-soft px-3 py-2 text-xs text-amber-ink" role="status">
+                                    Sumber data ini nonaktif sehingga tidak tersedia untuk pemilihan baru. Tautan pada kawasan ini tetap dipertahankan.
+                                </p>
+                            @endif
+
+                            @if (\Illuminate\Support\Facades\Route::has('katalog.sumber-data.show'))
+                                <a href="{{ route('katalog.sumber-data.show', $sumberKawasan) }}"
+                                   class="mt-2 inline-flex text-xs font-semibold text-rimba-600 hover:text-rimba-700 hover:underline">
+                                    Lihat detail sumber data
+                                </a>
+                            @endif
+                        @elseif ($kawasan->sumber_id)
+                            <p class="font-medium text-ink-700">Sumber data tidak ditemukan</p>
+                            <p class="mt-1 text-xs text-ink-500">
+                                Kawasan masih merujuk sumber #{{ $kawasan->sumber_id }}, tetapi datanya tidak tersedia di katalog.
+                                Pilih sumber pengganti melalui menu Edit.
+                            </p>
+                        @else
+                            <span class="text-ink-400">Belum ditautkan</span>
+                        @endif
                     </dd>
                 </div>
 

@@ -37,6 +37,14 @@
                             danger: {
                                 soft: '#fbe9e7',
                                 ink: '#914b41',
+                            },
+                            amber: {
+                                soft: '#fff2d6',
+                                ink: '#855b16',
+                            },
+                            info: {
+                                soft: '#e8eef9',
+                                ink: '#2f5c9e',
                             }
                         }
                     }
@@ -44,6 +52,28 @@
             }
         </script>
         <style>
+            .field-label {
+                display: block;
+                margin-bottom: 0.375rem;
+                font-size: 0.875rem;
+                font-weight: 500;
+                color: #34463a;
+            }
+            .field-input {
+                width: 100%;
+                border-radius: 0.5rem;
+                border: 1px solid #d8e1d9;
+                background-color: white;
+                padding: 0.625rem 0.875rem;
+                font-size: 0.875rem;
+                color: #173e2d;
+                outline: none;
+                transition: all 0.15s ease;
+            }
+            .field-input:focus {
+                border-color: #2f7a50;
+                box-shadow: 0 0 0 2px rgba(47, 122, 80, 0.2);
+            }
             .btn-primary {
                 display: inline-flex;
                 align-items: center;
@@ -127,6 +157,7 @@
             });
         </script>
     @endif
+    @stack('styles')
 </head>
 <body class="min-h-screen bg-rimba-50 font-sans text-ink-700 antialiased">
     <a href="#konten-utama" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-rimba-700 focus:shadow">
@@ -182,5 +213,6 @@
             </footer>
         </div>
     </div>
+    @stack('scripts')
 </body>
 </html>

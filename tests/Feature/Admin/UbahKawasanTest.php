@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Enums\StatusKualitas;
 use App\Models\Kawasan;
 use App\Models\Pengguna;
 use App\Models\Wilayah;
@@ -203,6 +204,196 @@ class UbahKawasanTest extends TestCase
             ->assertSee(route('admin.kawasan.edit', $kawasan), false);
     }
 
+    // ── Skenario Sumber Data (Edit) ──────────────────────────────────────────
+
+    public function test_edit_kawasan_ganti_ke_sumber_aktif_baru(): void
+    {
+        $admin    = Pengguna::factory()->admin()->create();
+        $wilayah  = $this->buatWilayah();
+        $lamaSumberId = $this->buatSumberData(aktif: true, nama: 'Sumber Lama');
+        $baruSumberId = $this->buatSumberData(aktif: true, nama: 'Sumber Baru');
+        $kawasan  = $this->buatKawasan($wilayah, ['sumber_id' => $lamaSumberId]);
+
+        $this->actingAs($admin)
+            ->put(route('admin.kawasan.update', $kawasan), $this->dataUbah($kawasan, [
+                'sumber_id' => $baruSumberId,
+            ]))
+            ->assertRedirect(route('admin.kawasan.index'))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame($baruSumberId, $kawasan->refresh()->sumber_id);
+    }
+
+    public function test_edit_kawasan_lepas_sumber_dengan_nilai_kosong(): void
+    {
+        $admin   = Pengguna::factory()->admin()->create();
+        $wilayah = $this->buatWilayah();
+        $sumberId = $this->buatSumberData(aktif: true);
+        $kawasan  = $this->buatKawasan($wilayah, ['sumber_id' => $sumberId]);
+
+        $this->actingAs($admin)
+            ->put(route('admin.kawasan.update', $kawasan), $this->dataUbah($kawasan, [
+                'sumber_id' => '',
+            ]))
+            ->assertRedirect(route('admin.kawasan.index'))
+            ->assertSessionHasNoErrors();
+
+        $this->assertNull($kawasan->refresh()->sumber_id);
+    }
+
+    public function test_sumber_nonaktif_yang_terpasang_tetap_bisa_dipertahankan(): void
+    {
+        $admin    = Pengguna::factory()->admin()->create();
+        $wilayah  = $this->buatWilayah();
+        $sumberId = $this->buatSumberData(aktif: false);
+        $kawasan  = $this->buatKawasan($wilayah, ['sumber_id' => $sumberId]);
+
+        // Kirim sumber_id yang sama (nonaktif tapi sudah terpasang) → harus lolos
+        $this->actingAs($admin)
+            ->put(route('admin.kawasan.update', $kawasan), $this->dataUbah($kawasan, [
+                'sumber_id' => $sumberId,
+            ]))
+            ->assertRedirect(route('admin.kawasan.index'))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame($sumberId, $kawasan->refresh()->sumber_id);
+    }
+
+    public function test_sumber_nonaktif_lain_ditolak_saat_edit(): void
+    {
+        $admin          = Pengguna::factory()->admin()->create();
+        $wilayah        = $this->buatWilayah();
+        $sumberAktif    = $this->buatSumberData(aktif: true,  nama: 'Sumber Aktif');
+        $sumberNonaktif = $this->buatSumberData(aktif: false, nama: 'Sumber Nonaktif');
+        $kawasan        = $this->buatKawasan($wilayah, ['sumber_id' => $sumberAktif]);
+
+        // Mencoba mengganti ke sumber nonaktif LAIN → harus ditolak
+        $this->actingAs($admin)
+            ->put(route('admin.kawasan.update', $kawasan), $this->dataUbah($kawasan, [
+                'sumber_id' => $sumberNonaktif,
+            ]))
+            ->assertSessionHasErrors('sumber_id');
+
+        $this->assertSame($sumberAktif, $kawasan->refresh()->sumber_id);
+    }
+
+    public function test_sumber_id_fiktif_ditolak_saat_edit(): void
+    {
+        $admin   = Pengguna::factory()->admin()->create();
+        $kawasan = $this->buatKawasan($this->buatWilayah());
+
+        $this->actingAs($admin)
+            ->put(route('admin.kawasan.update', $kawasan), $this->dataUbah($kawasan, [
+                'sumber_id' => 999999,
+            ]))
+            ->assertSessionHasErrors('sumber_id');
+
+        $this->assertNull($kawasan->refresh()->sumber_id);
+    }
+
+    public function test_form_edit_menampilkan_sumber_nonaktif_yang_terpasang(): void
+    {
+        $admin    = Pengguna::factory()->admin()->create();
+        $wilayah  = $this->buatWilayah();
+        $sumberId = $this->buatSumberData(aktif: false, nama: 'Sumber Nonaktif Lama');
+        $kawasan  = $this->buatKawasan($wilayah, ['sumber_id' => $sumberId]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.kawasan.edit', $kawasan))
+            ->assertOk()
+            ->assertSee('Sumber Nonaktif Lama')
+            ->assertSee('(nonaktif)');
+    }
+
+    public function test_edit_kawasan_tidak_mengubah_sumber_id_jika_field_absen(): void
+    {
+        $admin    = Pengguna::factory()->admin()->create();
+        $wilayah  = $this->buatWilayah();
+        $sumberId = $this->buatSumberData(aktif: true);
+        $kawasan  = $this->buatKawasan($wilayah, ['sumber_id' => $sumberId]);
+
+        // dataUbah() tidak menyertakan sumber_id → field absen → 'sometimes' → tidak divalidasi
+        $this->actingAs($admin)
+            ->put(route('admin.kawasan.update', $kawasan), $this->dataUbah($kawasan, [
+                'nama_kawasan' => 'Nama Diperbarui',
+            ]))
+            ->assertRedirect(route('admin.kawasan.index'))
+            ->assertSessionHasNoErrors();
+
+        $kawasan->refresh();
+        $this->assertSame('Nama Diperbarui', $kawasan->nama_kawasan);
+        $this->assertSame($sumberId, $kawasan->sumber_id); // sumber tidak berubah
+    }
+
+    public function test_edit_kawasan_tidak_mengubah_sumber_id_kawasan_lain(): void
+    {
+        $admin    = Pengguna::factory()->admin()->create();
+        $wilayah  = $this->buatWilayah();
+        $sumberA  = $this->buatSumberData(aktif: true, nama: 'Sumber A');
+        $sumberB  = $this->buatSumberData(aktif: true, nama: 'Sumber B');
+        $kawasanA = $this->buatKawasan($wilayah, ['sumber_id' => $sumberA]);
+        $kawasanB = $this->buatKawasan($wilayah, ['sumber_id' => $sumberB]);
+
+        $this->actingAs($admin)
+            ->put(route('admin.kawasan.update', $kawasanA), $this->dataUbah($kawasanA, [
+                'sumber_id' => '',
+            ]))
+            ->assertRedirect(route('admin.kawasan.index'))
+            ->assertSessionHasNoErrors();
+
+        $this->assertNull($kawasanA->refresh()->sumber_id);
+        $this->assertSame($sumberB, $kawasanB->refresh()->sumber_id);
+    }
+
+    public function test_edit_kawasan_tidak_mengubah_sumber_geometri_pada_batas_kawasan(): void
+    {
+        $admin          = Pengguna::factory()->admin()->create();
+        $wilayah        = $this->buatWilayah();
+        $sumberAtribut  = $this->buatSumberData(aktif: true, nama: 'Sumber Atribut Lama');
+        $sumberBaru     = $this->buatSumberData(aktif: true, nama: 'Sumber Atribut Baru');
+        $sumberGeometri = $this->buatSumberData(aktif: true, nama: 'Sumber Geometri Batas');
+        $kawasan        = $this->buatKawasan($wilayah, ['sumber_id' => $sumberAtribut]);
+
+        try {
+            DB::statement("
+                INSERT INTO batas_kawasan (
+                    kawasan_id,
+                    nomor_versi,
+                    data_geometri,
+                    kode_crs,
+                    sumber_id,
+                    status_validasi,
+                    dibuat_oleh,
+                    dibuat_pada
+                ) VALUES (
+                    ?,
+                    1,
+                    ST_GeomFromText('POLYGON((101.440 -0.500, 101.450 -0.500, 101.450 -0.510, 101.440 -0.510, 101.440 -0.500))', 4326),
+                    'EPSG:4326',
+                    ?,
+                    'VALID',
+                    ?,
+                    NOW()
+                )
+            ", [$kawasan->kawasan_id, $sumberGeometri, $admin->pengguna_id]);
+        } catch (\Throwable $e) {
+            $this->markTestSkipped('Fixture PostGIS batas_kawasan tidak dapat dibuat: ' . $e->getMessage());
+        }
+
+        $this->actingAs($admin)
+            ->put(route('admin.kawasan.update', $kawasan), $this->dataUbah($kawasan, [
+                'sumber_id' => $sumberBaru,
+            ]))
+            ->assertRedirect(route('admin.kawasan.index'))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame($sumberBaru, $kawasan->refresh()->sumber_id);
+        $this->assertSame(
+            $sumberGeometri,
+            DB::table('batas_kawasan')->where('kawasan_id', $kawasan->kawasan_id)->value('sumber_id')
+        );
+    }
+
     private function buatWilayah(string $nama = 'Blok Barat', bool $aktif = true): Wilayah
     {
         return Wilayah::create([
@@ -226,16 +417,17 @@ class UbahKawasanTest extends TestCase
         ], $attributes));
     }
 
-    private function buatSumberData(): int
+    private function buatSumberData(bool $aktif = true, string $nama = 'Sumber Uji'): int
     {
         return DB::table('sumber_data')->insertGetId([
-            'nama_sumber' => 'Sumber Uji',
-            'nama_penyedia' => 'Penyedia Uji',
-            'nama_lisensi' => 'CC BY 4.0',
-            'format_data' => 'GeoJSON',
-            'kode_crs' => 'EPSG:4326',
-            'status_kualitas' => 'TERVERIFIKASI',
-        ]);
+            'nama_sumber'     => $nama,
+            'nama_penyedia'   => 'Penyedia Uji',
+            'nama_lisensi'    => 'CC BY 4.0',
+            'format_data'     => 'GeoJSON',
+            'kode_crs'        => 'EPSG:4326',
+            'status_kualitas' => StatusKualitas::VERIFIED->value,
+            'is_aktif'        => $aktif,
+        ], 'sumber_id');
     }
 
     /**
