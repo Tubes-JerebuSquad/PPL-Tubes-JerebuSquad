@@ -65,6 +65,17 @@ class Kawasan extends Model
         return $this->belongsTo(Pengguna::class, 'dibuat_oleh', 'pengguna_id');
     }
 
+    /**
+     * Sumber data atribut kawasan. Terpisah dari sumber geometri pada
+     * batas_kawasan dan tidak disinkronkan otomatis.
+     *
+     * @return BelongsTo<SumberData, $this>
+     */
+    public function sumber(): BelongsTo
+    {
+        return $this->belongsTo(SumberData::class, 'sumber_id', 'sumber_id');
+    }
+
     public function scopeAktif(Builder $query): Builder
     {
         return $query->where('is_aktif', true);

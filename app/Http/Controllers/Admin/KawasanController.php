@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\SimpanKawasanRequest;
 use App\Http\Requests\Admin\UbahKawasanRequest;
 use App\Models\Kawasan;
+use App\Models\SumberData;
 use App\Models\Wilayah;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
@@ -28,6 +29,7 @@ class KawasanController extends Controller
     {
         return view('admin.kawasan.create', [
             'daftarWilayah' => $this->daftarWilayah(),
+            'daftarSumber' => $this->daftarSumber(),
         ]);
     }
 
@@ -46,7 +48,7 @@ class KawasanController extends Controller
 
     public function show(Kawasan $kawasan): View
     {
-        $kawasan->load(['wilayah', 'pembuat']);
+        $kawasan->load(['wilayah', 'pembuat', 'sumber']);
 
         return view('admin.kawasan.show', [
             'kawasan' => $kawasan,
@@ -58,6 +60,7 @@ class KawasanController extends Controller
         return view('admin.kawasan.edit', [
             'kawasan' => $kawasan,
             'daftarWilayah' => $this->daftarWilayah($kawasan),
+            'daftarSumber' => $this->daftarSumber($kawasan),
         ]);
     }
 
@@ -71,6 +74,15 @@ class KawasanController extends Controller
         return redirect()
             ->route('admin.kawasan.index')
             ->with('status', 'Data kawasan berhasil diperbarui.');
+    }
+
+    private function daftarSumber(?Kawasan $kawasan = null): Collection
+    {
+        // status_kualitas sengaja tidak diambil agar nilai lama di luar enum
+        // tidak memicu ValueError saat opsi dropdown dirender.
+        return SumberData::query()
+            ->tersediaUntukPilihan($kawasan?->sumber_id)
+            ->get(['sumber_id', 'nama_sumber', 'kode_crs', 'is_aktif']);
     }
 
     private function daftarWilayah(?Kawasan $kawasan = null): Collection
