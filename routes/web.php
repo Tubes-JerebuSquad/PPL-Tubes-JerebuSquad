@@ -59,3 +59,4 @@ require __DIR__.'/admin.php';
 require __DIR__.'/katalog.php';
 require __DIR__.'/laporan.php';
 require __DIR__.'/digitasi_batas_kawasan.php';
+require __DIR__.'/edukasi.php';
