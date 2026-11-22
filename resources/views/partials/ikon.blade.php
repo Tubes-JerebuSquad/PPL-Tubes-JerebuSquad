@@ -54,6 +54,13 @@
         </svg>
         @break
 
+    @case('book')
+        <svg class="{{ $kelas }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4.5 5.5A2.5 2.5 0 0 1 7 3h12.5v16H7a2.5 2.5 0 0 0-2.5 2.5V5.5Z" />
+            <path d="M4.5 18.5A2.5 2.5 0 0 1 7 16h12.5" />
+        </svg>
+        @break
+
     @default
         <svg class="{{ $kelas }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
             <circle cx="12" cy="12" r="8" />

@@ -74,6 +74,12 @@
                 'pola' => null,
                 'ikon' => 'map',
             ],
+            [
+                'label' => 'Materi Edukasi',
+                'route' => 'pengawas.edukasi.index',
+                'pola' => 'pengawas.edukasi.*',
+                'ikon' => 'book',
+            ],
         ];
     } elseif ($role === 'petugas lapangan') {
         $menu = [
@@ -139,6 +145,12 @@
                 'route' => null,
                 'pola' => null,
                 'ikon' => 'users',
+            ],
+            [
+                'label' => 'Materi Edukasi',
+                'route' => 'edukasi.index',
+                'pola' => 'edukasi.*',
+                'ikon' => 'book',
             ],
         ];
     }
