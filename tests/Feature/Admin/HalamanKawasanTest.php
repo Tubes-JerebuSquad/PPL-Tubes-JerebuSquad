@@ -76,6 +76,59 @@ class HalamanKawasanTest extends TestCase
             ->assertSee($kawasan->wilayah->nama_wilayah);
     }
 
+    public function test_detail_kawasan_tanpa_poligon_menampilkan_pesan_dan_tautan_kelola_batas(): void
+    {
+        $admin = Pengguna::factory()->admin()->create();
+        $kawasan = $this->buatKawasan();
+        $urlKelolaBatas = route('admin.kawasan.batas.index', $kawasan->kawasan_id);
+
+        $this->actingAs($admin)
+            ->get(route('admin.kawasan.show', $kawasan))
+            ->assertOk()
+            ->assertSeeText('Informasi Geospasial')
+            ->assertSeeText('Belum ada poligon batas kawasan')
+            ->assertDontSeeText('Bounding Box')
+            ->assertSeeText('Kelola Batas Kawasan')
+            ->assertSeeHtml('href="'.$urlKelolaBatas.'"');
+
+        $this->get($urlKelolaBatas)
+            ->assertOk()
+            ->assertSeeText('Digitasi Batas Kawasan');
+    }
+
+    public function test_detail_kawasan_menampilkan_bbox_dan_nomor_versi_poligon_terbaru(): void
+    {
+        $admin = Pengguna::factory()->admin()->create();
+        $kawasan = $this->buatKawasan();
+
+        $insertBatas = <<<'SQL'
+            INSERT INTO batas_kawasan (kawasan_id, nomor_versi, data_geometri, kode_crs, status_validasi)
+            VALUES (?, ?, ST_Multi(ST_MakeEnvelope(?, ?, ?, ?, 4326)), 'EPSG:4326', 'VALID')
+            SQL;
+
+        DB::insert($insertBatas, [$kawasan->kawasan_id, 2, 106.25, -6.75, 106.5, -6.5]);
+        DB::insert($insertBatas, [$kawasan->kawasan_id, 1, 107.25, -7.75, 107.5, -7.5]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.kawasan.show', $kawasan))
+            ->assertOk()
+            ->assertSeeText('Informasi Geospasial')
+            ->assertSeeText('Versi 2')
+            ->assertSeeText('WGS 84 (EPSG:4326)')
+            ->assertSeeTextInOrder([
+                'Bounding Box',
+                'Bujur minimum', '106.25',
+                'Bujur maksimum', '106.5',
+                'Lintang minimum', '-6.75',
+                'Lintang maksimum', '-6.5',
+            ])
+            ->assertDontSeeText('Versi 1')
+            ->assertDontSeeText(['107.25', '107.5', '-7.75', '-7.5'])
+            ->assertDontSeeText('Belum ada poligon batas kawasan')
+            ->assertSeeText('Kelola Batas Kawasan')
+            ->assertSeeHtml('href="'.route('admin.kawasan.batas.index', $kawasan->kawasan_id).'"');
+    }
+
     public function test_id_kawasan_yang_tidak_ditemukan_menghasilkan_404(): void
     {
         $admin = Pengguna::factory()->admin()->create();
