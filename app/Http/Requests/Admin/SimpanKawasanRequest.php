@@ -26,6 +26,14 @@ class SimpanKawasanRequest extends FormRequest
             'nama_kawasan' => ['required', 'string', 'max:200'],
             'jenis_kawasan' => ['required', 'string', 'max:100'],
             'status_kawasan' => ['required', 'string', 'max:50'],
+            'sumber_id' => [
+                'sometimes',
+                'nullable',
+                'integer',
+                Rule::exists('sumber_data', 'sumber_id')->where(
+                    fn (Builder $query) => $query->where('is_aktif', true)
+                ),
+            ],
             'catatan' => ['nullable', 'string', 'max:2000'],
             'is_aktif' => ['sometimes', 'boolean'],
         ];
