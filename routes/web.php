@@ -58,4 +58,5 @@ Route::middleware('auth')->group(function () {
 require __DIR__.'/admin.php';
 require __DIR__.'/katalog.php';
 require __DIR__.'/laporan.php';
+require __DIR__.'/pengawas.php';
 require __DIR__.'/digitasi_batas_kawasan.php';
