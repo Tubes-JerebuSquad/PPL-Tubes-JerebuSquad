@@ -51,6 +51,12 @@
                 'ikon' => 'grid',
             ],
             [
+                'label' => 'Rencana Kegiatan',
+                'route' => 'pengawas.kegiatan.index',
+                'pola' => 'pengawas.kegiatan.*',
+                'ikon' => 'database',
+            ],
+            [
                 'label' => 'Peta Interaktif',
                 'route' => 'peta.index',
                 'pola' => 'peta.*',
