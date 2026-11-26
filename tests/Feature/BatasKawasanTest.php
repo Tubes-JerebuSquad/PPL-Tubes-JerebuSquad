@@ -3,17 +3,14 @@
 namespace Tests\Feature;
 
 use App\Models\Pengguna;
-use Database\Seeders\PeranSeeder;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class BatasKawasanTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     private Pengguna $admin;
     private Pengguna $masyarakat;
@@ -24,35 +21,10 @@ class BatasKawasanTest extends TestCase
     {
         parent::setUp();
 
-        if (!Schema::hasTable('peran')) {
-            DB::statement('CREATE EXTENSION IF NOT EXISTS postgis');
-            $this->artisan('migrate');
-        }
+       $this->admin = Pengguna::factory()->admin()->create();
+$this->masyarakat = Pengguna::factory()->masyarakat()->create();
 
-        if (DB::table('peran')->count() === 0) {
-            $this->seed(PeranSeeder::class);
-        }
-
-        $adminId = DB::table('pengguna')->insertGetId([
-            'peran_id' => 4,
-            'nama_lengkap' => 'Admin Test PBI02',
-            'email' => 'admin.test.pbi02@rimbawatch.org',
-            'password_hash' => Hash::make('password123'),
-            'status_akun' => 'ACTIVE',
-            'dibuat_pada' => now(),
-        ], 'pengguna_id');
-
-        $wargaId = DB::table('pengguna')->insertGetId([
-            'peran_id' => 1,
-            'nama_lengkap' => 'Warga Test PBI02',
-            'email' => 'warga.test.pbi02@rimbawatch.org',
-            'password_hash' => Hash::make('password123'),
-            'status_akun' => 'ACTIVE',
-            'dibuat_pada' => now(),
-        ], 'pengguna_id');
-
-        $this->admin = Pengguna::findOrFail($adminId);
-        $this->masyarakat = Pengguna::findOrFail($wargaId);
+$adminId = $this->admin->pengguna_id;
 
         $wilayahId = DB::table('wilayah')->insertGetId([
             'kode_wilayah' => 'TEST-PBI02',
